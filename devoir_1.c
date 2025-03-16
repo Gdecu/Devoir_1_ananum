@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h> 
+
 
 #define idxA(i, j) ((i)*n + (j))
 
@@ -28,7 +30,7 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
  * @param e tableau de taille n qui contient la sous-diagonale de la matrice tridiagonale, mis à jour en sortie de telle sorte que H_{k+1} ← Q^{∗}_{k} H_{k} Q_{k}
  * @param m indique la taille de la matrice active (m ≤ n), c’est-à-dire sur laquelle on n’a pas encore isolé les valeurs propres
  * @param eps la tolérance pour déclarer qu’une valeur propre a été isolée : Golub et Van Loan proposent |hp+1,p| ≤ ϵ(|hpp| + |hp+1,p+1|).
- * @return nombre d'itérations effectuées
+ * @return nombre la nouvelle taille de la matrice active
  */
 int step_qr_tridiag(double *d, double *e, int m, double eps) {
     return 0;
@@ -43,8 +45,40 @@ int step_qr_tridiag(double *d, double *e, int m, double eps) {
  * @param k nombre de sous-diagonales non-nulles
  * @param eps la tolérance pour déclarer qu’une valeur propre a été isolée : Golub
  * @param max_iter nombre maximal d’itérations qr qu'on souhaite effectuer
+ * @param d tableau de taille n qui contient en sortie les valeurs propres de la matrice A
  * @return retourne le nombre d’itérations nécessaires, ou bien -1 si l’algorithme n’a pas convergé
 */
-int qr_eigs_(double *A, int n, int k, double eps, int max_iter) {
-    return 0;
+int qr_eigs_(double *A, int n, int k, double eps, int max_iter, double *d) {
+
+    double *e = (double *)malloc((n-1) * sizeof(double));
+    int m, index, iter = 0;
+
+    if (e == NULL) {
+        free(e);
+        return -1;
+    }
+
+    tridiagonalize(A, n, k, d, e);
+
+    for (iter = 0; iter < max_iter && n > 1 ; iter ++){
+        m = step_qr_tridiag(d, e, n, eps);
+        if (m  == n - 1){
+            // On a isolé une valeur propre (stocké dans d), la matrice active diminue d'une taille
+            // donc on incremente l'emplacement de d et e de 1
+            d++;
+            e++;
+            index++;
+            n = m;
+        } else if (m != n){
+            free(d);
+            free(e);
+            return -1;
+        }
+
+    }
+
+    d -= index; // On ramène d à son emplacement initial -  je pense inutile ...
+
+    free(e);
+    return iter;
 }
