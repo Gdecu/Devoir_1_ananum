@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define idxA(i, j) ((i)*n + (j))
+#define idxA(i, j) ((i)*n + (j)) // full
+#define idxBand(i, j, k) ((i) * (k + 1) + (j - i + k)) // band
 
 
 /**
@@ -18,7 +19,9 @@
  * @param e est un tableau de taille n qui contient en sortie la sous-diagonale de la matrice tridiagonale dans ses n − 1 premiers éléments
  */
 void tridiagonalize(double *A, int n, int k, double *d, double *e) {
-
+    for (int i = 0; i < n; i++) {
+        d[i] = A[idxBand(i, i, k)];
+    }
 }
 
 
