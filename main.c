@@ -4,6 +4,9 @@
 #include <math.h>
 #include <string.h> 
 
+#define idxA(i, j) ((i)*n + (j)) // full
+#define idxBand(i, j, k) ((i) * (k + 1) + (j - i + k)) // band
+
 void print_band_matrix(double *A, int n, int k) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {

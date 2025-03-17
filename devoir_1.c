@@ -4,10 +4,8 @@
 #include <math.h>
 #include <string.h> 
 
-
 #define idxA(i, j) ((i)*n + (j)) // full
 #define idxBand(i, j, k) ((i) * (k + 1) + (j - i + k)) // band
-
 
 /**
  * @brief tridiagonalise une matrice symétrique bande par transformations de similitudes
