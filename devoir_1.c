@@ -23,6 +23,28 @@
 void tridiagonalize(double *A, int n, int k, double *d, double *e) {
     for (int i = 0; i < n; i++) {
         d[i] = A[idxBand(i, i, k)];
+        if (i < n - 1) {
+            double a = A[idxBand(i, i + 1, k)];
+            double b = A[idxBand(i + 1, i, k)];
+            double r = hypot(a, b);
+            double c = a / r;
+            double s = -b / r;
+            
+            A[idxBand(i, i + 1, k)] = r;
+            e[i] = r;
+            
+            for (int j = i + 1; j < n; j++) {
+                if (j - i <= k) {
+                    double A_ji = A[idxBand(j, i, k)];
+                    double A_j1i = (j + 1 < n) ? A[idxBand(j + 1, i, k)] : 0.0;
+                    
+                    A[idxBand(j, i, k)] = c * A_ji - s * A_j1i;
+                    if (j + 1 < n) {
+                        A[idxBand(j + 1, i, k)] = s * A_ji + c * A_j1i;
+                    }
+                }
+            }
+        }
     }
 }
 
