@@ -7,6 +7,28 @@
 #define idxA(i, j) ((i)*n + (j)) // full
 #define idxBand(i, j, k) ((i) * (k + 1) + (j - i + k)) // band
 
+
+/**
+ * @brief calcule le carré d'un nombre
+ * @param x nombre dont on veut le carré
+ * @return le carré de x
+ */
+double square( double x){
+    return x * x;
+}
+
+
+
+/**
+ * @brief calcule le maximum entre deux entiers
+ * @param a premier entier
+ * @param b deuxième entier
+*/
+double max_double(double a, double b) {
+    return (a > b) ? a : b;
+}
+
+
 /**
  * @brief tridiagonalise une matrice symétrique bande par transformations de similitudes
  * @param A entrées de la matrice dans un tableau Row-Major :
@@ -55,6 +77,26 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
  * @return nombre la nouvelle taille de la matrice active
  */
 int step_qr_tridiag(double *d, double *e, int m, double eps) {
+
+    if (m == 1){
+        return 1;
+    }
+
+    if (square(d[m-1] + d[m-2]) + 4 * square(e[m-1]) < 0){
+        return m;
+    }
+
+    double mu = max_double((d[m-1] + d[m-2] - sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m-1])))/2,(d[m-1] + d[m-2] + sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m-1])))/2);
+
+    for (int i = 0; i < m - 1; i++){
+        d[i] -= mu;
+    }
+
+    for (int i = 0; i < m - 1; i++){
+        d[i] += mu;
+    }
+
+    
     return 0;
 }
 
