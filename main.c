@@ -35,7 +35,7 @@ void test_tridiagonalize_band() {
     printf("Matrice bande initiale:\n");
     print_band_matrix(A, n, k);
     
-    tridiagonalize_band(A, n, k, d, e);
+    tridiagonalize(A, n, k, d, e);
     
     printf("Matrice après tridiagonalisation:\n");
     print_band_matrix(A, n, k);

@@ -28,6 +28,19 @@ double max_double(double a, double b) {
     return (a > b) ? a : b;
 }
 
+// Applique une rotation de Givens pour annuler A[i+1, i]
+void givens_rotation(double *A, int n, int k, int i, double *c, double *s) {
+    double a = A[idxBand(i, i, k)];   // Élément diagonal
+    double b = A[idxBand(i + 1, i, k)]; // Élément sous-diagonal
+    
+    double r = sqrt(a * a + b * b);
+    *c = a / r;
+    *s = -b / r;
+    
+    // Mise à jour des éléments de la matrice en appliquant la rotation
+    A[idxBand(i, i, k)] = r;
+    A[idxBand(i + 1, i, k)] = 0;  // Annulation de l'élément sous-diagonal
+}
 
 /**
  * @brief tridiagonalise une matrice symétrique bande par transformations de similitudes
@@ -40,33 +53,17 @@ double max_double(double a, double b) {
  * @param e est un tableau de taille n qui contient en sortie la sous-diagonale de la matrice tridiagonale dans ses n − 1 premiers éléments
  */
 void tridiagonalize(double *A, int n, int k, double *d, double *e) {
-    for (int i = 0; i < n; i++) {
+    double c, s;
+    
+    for (int i = 0; i < n - 1; i++) {
+        givens_rotation(A, n, k, i, &c, &s);
+        
+        // Stockage des valeurs tridiagonales
         d[i] = A[idxBand(i, i, k)];
-        if (i < n - 1) {
-            double a = A[idxBand(i, i + 1, k)];
-            double b = A[idxBand(i + 1, i, k)];
-            double r = hypot(a, b);
-            double c = a / r;
-            double s = -b / r;
-            
-            A[idxBand(i, i + 1, k)] = r;
-            e[i] = r;
-            
-            for (int j = i + 1; j < n; j++) {
-                if (j - i <= k) {
-                    double A_ji = A[idxBand(j, i, k)];
-                    double A_j1i = (j + 1 < n) ? A[idxBand(j + 1, i, k)] : 0.0;
-                    
-                    A[idxBand(j, i, k)] = c * A_ji - s * A_j1i;
-                    if (j + 1 < n) {
-                        A[idxBand(j + 1, i, k)] = s * A_ji + c * A_j1i;
-                    }
-                }
-            }
-        }
+        e[i] = (i < n - 1) ? A[idxBand(i + 1, i, k)] : 0;
     }
+    d[n - 1] = A[idxBand(n - 1, n - 1, k)]; // Dernière diagonale
 }
-
 
 /**
  * @brief effectue une étape de l’algorithme QR avec un shift de Wilkinson µ sur une matrice tridiagonale symétrique
