@@ -10,7 +10,7 @@
 void print_band_matrix(double *A, int n, int k) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            if (j >= i - k && j <= i) {
+            if (fabs(i - j) <= k) {
                 printf("%8.4f ", A[idxBand(i, j, k)]);
             } else {
                 printf("%8.4f ", 0.0);
@@ -21,16 +21,16 @@ void print_band_matrix(double *A, int n, int k) {
     printf("\n");
 }
 
-void test_tridiagonalize_band() {
-    int n = 4;
-    int k = 1;
-    double A[4 * 2] = {
-        4.0, 1.0,
-        1.0, 3.0,
-        2.0, 5.0,
-        0.0, 2.0
-    };
-    double d[4], e[4] = {0};
+void test_tridiagonalize(int n, int k) {
+    double *A = (double *)malloc(n * (k + 1) * sizeof(double));
+    double *d = (double *)malloc(n * sizeof(double));
+    double *e = (double *)malloc((n - 1) * sizeof(double));
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            A[idxBand(i, j, k)] = (double)(i + j + 1);
+        }
+    }
     
     printf("Matrice bande initiale:\n");
     print_band_matrix(A, n, k);
@@ -45,11 +45,18 @@ void test_tridiagonalize_band() {
     printf("\n\nSous-diagonale:\n");
     for (int i = 0; i < n - 1; i++) printf("%8.4f ", e[i]);
     printf("\n");
+
+    free(A);
+    free(d);
+    free(e);
 }
 
 int main( int argc, char *argv[] ) {
 
-    test_tridiagonalize_band();
+    int n = atoi(argv[1]);
+    int k = atoi(argv[2]);
+
+    test_tridiagonalize(n, k);
 
     /* test pour qr eigs
     

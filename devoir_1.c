@@ -4,8 +4,29 @@
 #include <math.h>
 #include <string.h> 
 
-#define idxBand(i, j, k, n) (fabs(i - j) > k ? 0 : ( j <= n - k + 1 ? (j-1)*k + i : (j-1)*k + i - (( j - 1  + k - n ) * (j + k - n)/2) )) // band
+#define idxBand(i, j, k) ((i) * ((k) + 1) + ((j) - (i) + (k))) // band
+#define min_int(a, b) ((a) < (b) ? (a) : (b))
+#define max_int(a, b) ((a) > (b) ? (a) : (b))
 
+/**
+  * @brief calcule le carré d'un nombre
+  * @param x nombre dont on veut le carré
+  * @return le carré de x
+  */
+ double square( double x){
+    return x * x;
+}
+
+
+
+/**
+ * @brief calcule le maximum entre deux entiers
+ * @param a premier entier
+ * @param b deuxième entier
+*/
+double max_double(double a, double b) {
+    return (a > b) ? a : b;
+}
 
 /**
  * @brief tridiagonalise une matrice symétrique bande par transformations de similitudes
@@ -22,30 +43,55 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
     
     // Rotation de Givens
     // A --> A G
-    for (int j = 0; j < n-1; j++){
+    for (int i = 0; i < n-1; i++){
+        for (int j = k + i; fabs(i - j) < 2; j--){
+            a = A[idxBand(i, i, k)];         // Élément diagonal
+            b = A[idxBand(i, i+1, k)];       // Élément sous-diagonal
+
+            if (b == 0) {continue;}             // Si l'élément sous-diagonal est nul, on passe à l'itération suivante
+
+            r = sqrt(a * a + b * b);
+            c = a / r;
+            s = -b / r;
+
+            // Mise à jour des éléments de la matrice en appliquant la rotation
+            A[idxBand(i, j, k)] = r;
+            A[idxBand(i, j+1, k)] = 0;
+            // On mets à jour le  reste des colonnes j et j+1
+            for (int l = j + 1; min_int(j + k + 1, n); l++) {
+                A[idxBand(i, l, k)] = c * A[idxBand(i, l, k)] - s * A[idxBand(i, l + 1, k)];
+                A[idxBand(i + 1, l, k)] = s * A[idxBand(i, l, k)] + c * A[idxBand(i + 1, l, k)];
+            }
+
+        }
         
     }
     // A G --> G^* A G = H
     for (int j = 0; j < n - 1; j++) {
         for (int i = k + j; fabs(i - j) > 2; i--) { // on commence par mettre le dernier élément de la bande à 0
 
-            a = A[idxBand(i, i, k, n)];         // Élément diagonal
-            b = A[idxBand(i + 1, i, k, n)];     // Élément sous-diagonal
+            a = A[idxBand(i, j, k)];         // Élément diagonal
+            b = A[idxBand(i + 1, j, k)];     // Élément sous-diagonal
         
             if (b == 0) {continue;}             // Si l'élément sous-diagonal est nul, on passe à l'itération suivante
             
             r = sqrt(a * a + b * b);
-            c = a / r;
-            s = -b / r;
+            // G^* : on prend le complexe conjugué de la matrice de Givens transposée
+            c =  - a / r;
+            s = b / r;
         
             // Mise à jour des éléments de la matrice en appliquant la rotation
-            A[idxBand(i, j, k, n)] = r;
-            A[idxBand(i + 1, j, k, n)] = 0;
+            A[idxBand(i, j, k)] = r;
+            A[idxBand(i + 1, j, k)] = 0;
             // On mets à jour le  reste des lignes i et i+1
-            for (int l = j + 1; l < n; l++) { //min_int(j + k + 1, n)
-                A[idxBand(i, l, k, n)] = c * A[idxBand(i, l, k, n)] + s * A[idxBand(i, l + 1, k, n)];
-                A[idxBand(i + 1, l, k, n)] = - s * A[idxBand(i, l, k, n)] + c * A[idxBand(i + 1, l, k, n)];
+            for (int l = j + 1; l < min_int(j + k + 1, n); l++) {
+                A[idxBand(i, l, k)] = c * A[idxBand(i, l, k)] + s * A[idxBand(i, l + 1, k)];
+                A[idxBand(i + 1, l, k)] = - s * A[idxBand(i, l, k)] + c * A[idxBand(i + 1, l, k)];
             }
+
+            // Mise à jour des éléments de la matrice tridiagonale
+            d[j] = A[idxBand(j, j, k)];
+            e[j] = A[idxBand(j + 1, j, k)];
         }
     }
 }
