@@ -1,8 +1,11 @@
+
 #include "devoir_1.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h> 
+#include <complex.h>
+
 
 #define idxBand(i, j, k) ((i) * ((k) + 1) + ((j) - (i) + (k))) 
 #define min_int(a, b) ((a) < (b) ? (a) : (b))
@@ -24,66 +27,46 @@
  */
 void tridiagonalize(double *A, int n, int k, double *d, double *e) {
     double c, s, a, b, r;
+    double *mem = (double *)malloc(n * sizeof(double));
+    if (mem == NULL) {
+        free(mem);
+        return;
+    }
     
     // Rotation de Givens
-    // A --> A G
-    //printf("A --> A G\n");
-    for (int i = 0; i < n-1; i++){
-        for (int j = k + i; max_int(i,j) - min_int(i,j) > 1; j--){
-            //printf("i = %d,j = %d, k  = %d, %d\n", i, j, k, max_int(i,j) - min_int(i,j));
+    // A --> G A G* = H
+    printf("A --> A G\n");
+    for (int j = 0; j < n-1; j++){
+        for (int i = k + j - 1; i >= j + 1; i--){
 
             a = A[idxBand(i, j, k)];         // Élément diagonal
-            b = A[idxBand(i, j+1, k)];       // Élément sous-diagonal
-            //printf("a = %f, b = %f\n", a, b);
+            b = A[idxBand(i+1, j, k)];       // Élément sous-diagonal
+            printf("a = %f, b = %f\n", a, b);
+            printf("i = %d, j = %d\n", i, j);
 
             if (b == 0) {continue;}             // Si l'élément sous-diagonal est nul, on passe à l'itération suivante
 
             r = sqrt(a * a + b * b);
             c = a / r;
             s = -b / r;
+            printf("c = %f, s = %f, r = %f\n", c, s, r);
 
             // Mise à jour des éléments de la matrice en appliquant la rotation
-            A[idxBand(i, j, k)] = r;
-            A[idxBand(i, j+1, k)] = 0;
+            A[idxBand(i, j, k)] = r;                // A[i, j] = r
+            A[idxBand(i+1, j, k)] = 0;              // A[i+1, j] = 0
+            double Aii = A[idxBand(i, i, k)];
+            double Ai1i = A[idxBand(i+1, i, k)];
+            double Ai1i1 = A[idxBand(i+1, i+1, k)];
+            A[idxBand(i, i, k)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;
+            A[idxBand(i+1, i, k)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1;
+            A[idxBand(i+1, i+1, k)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;
+            double Aij, Ai1j;
             // On mets à jour le  reste des colonnes j et j+1
-            for (int l = j + 1; l < n; l++) {//min_int(j + k + 1, n)
-                A[idxBand(i, l, k)] = c * A[idxBand(i, l, k)] - s * A[idxBand(i, l + 1, k)];
-                A[idxBand(i + 1, l, k)] = s * A[idxBand(i, l, k)] + c * A[idxBand(i + 1, l, k)];
-                //printf("i = %d, j = %d, l = %d", i, j, l);
-            }
-            //printf("\n");
-            //print_band_matrix(A, n, k);
-
-
-        }
-        
-    }
-    // A G --> G^* A G = H
-    for (int j = 0; j < n - 1; j++) {
-        for (int i = k + j; fabs(i - j) > 2; i--) { // on commence par mettre le dernier élément de la bande à 0
-
-            a = A[idxBand(i, j, k)];         // Élément diagonal
-            b = A[idxBand(i + 1, j, k)];     // Élément sous-diagonal
-        
-            if (b == 0) {continue;}             // Si l'élément sous-diagonal est nul, on passe à l'itération suivante
+            // ...
             
-            r = sqrt(a * a + b * b);
-            // G^* : on prend le complexe conjugué de la matrice de Givens transposée
-            c =  - a / r;
-            s = b / r;
         
-            // Mise à jour des éléments de la matrice en appliquant la rotation
-            A[idxBand(i, j, k)] = r;
-            A[idxBand(i + 1, j, k)] = 0;
-            // On mets à jour le  reste des lignes i et i+1
-            for (int l = j + 1; l < min_int(j + k + 1, n); l++) {
-                A[idxBand(i, l, k)] = c * A[idxBand(i, l, k)] + s * A[idxBand(i, l + 1, k)];
-                A[idxBand(i + 1, l, k)] = - s * A[idxBand(i, l, k)] + c * A[idxBand(i + 1, l, k)];
-            }
-
-            // Mise à jour des éléments de la matrice tridiagonale
-            d[j] = A[idxBand(j, j, k)];
-            e[j] = A[idxBand(j + 1, j, k)];
+            printf("\n");
+            print_band_matrix(A, n, k);
         }
     }
 }
