@@ -5,18 +5,33 @@
 #include <string.h> 
 
 #define idxA(i, j) ((i)*n + (j)) // full
-#define idxBand(i, j, k) ((i) * (k + 1) + (j - i + k)) // band
+#define idxBand(i, j, k) ((k) * (i+1) + j ) // band
+#define min_int(a, b) ((a) < (b) ? (a) : (b))
 
 void print_band_matrix(double *A, int n, int k) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (fabs(i - j) <= k) {
-                printf("%8.4f ", A[idxBand(i, j, k)]);
+                if (i >= j) {
+                    printf(" %8.4f ", A[idxBand(i, j, k)]);
+                } else {
+                    printf(" %8.4f ", A[idxBand(j, i, k)]);
+                }
             } else {
-                printf("%8.4f ", 0.0);
+                printf(" %8.4f ", 0.0);
             }
         }
         printf("\n");
+    }
+    printf("\n");
+}
+
+void print_band_matrix_stockage(double *A, int n, int k) {
+    for (int i = 0; i < n * (k+1); i++) {
+        printf("%8.4f ", A[i]);
+        if ((i + 1) % (k + 1) == 0) {
+            printf("\n");
+        }
     }
     printf("\n");
 }
@@ -26,16 +41,19 @@ void test_tridiagonalize(int n, int k) {
     double *d = (double *)malloc(n * sizeof(double));
     double *e = (double *)malloc((n - 1) * sizeof(double));
 
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            A[idxBand(i, j, k)] = (double)(i + j + 1);
-        }
+    double order = 1.0;
+    printf("k = %d\n", k);
+    for (int i = 0; i < n* (k+1); i++) {
+            A[i] = i;
     }
     
     printf("Matrice bande initiale:\n");
     print_band_matrix(A, n, k);
-    
-    tridiagonalize(A, n, k, d, e);
+
+    printf("Stockage de A :\n");
+    print_band_matrix_stockage(A, n, k);
+
+    //tridiagonalize(A, n, k, d, e);
     
     printf("Matrice après tridiagonalisation:\n");
     print_band_matrix(A, n, k);
