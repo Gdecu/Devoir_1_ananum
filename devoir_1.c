@@ -56,27 +56,27 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
             double Aij, Aij1; 
             int col = j + 1, row = i; int reverse = 0;
             // On mets à jour le reste
-            for (int x = 0; x <= k; x++){
+            for (int x = 0; x < k; x++){
                 if (col == row) { // On ne touche pas aux éléments qui seront mis à jour plus bas
                     reverse = 1;
                     row += 2;
                     continue;
                 } 
                 if (row > n - 1) break;
-                Aij = A[idxBand(row, col, k)]; printf("Aij = %f\n", Aij);
+                Aij = A[idxBand(row, col, k)]; //printf("Aij = %f\n", Aij);
                 if (reverse == 0) {
                     Aij1 = A[idxBand(row + 1, col, k)];
                 } else {
                     Aij1 = A[idxBand(row, col + 1, k)];
-                } printf("Aij1 = %f\n", Aij1);
+                } //printf("Aij1 = %f\n", Aij1);
 
                 A[idxBand(row, col, k)] = c * Aij - s * Aij1; //printf("A[%d, %d], %f * %f - %f * %f = %f\n", row, col,c, Aij, s, Aij1, c * Aij - s * Aij1);
                 A[idxBand(row, col + 1, k)] = s * Aij + c * Aij1; //printf("A[%d, %d], %f * %f + %f * %f = %f\n", row, col + 1, s, Aij, c, Aij1, s * Aij + c * Aij1);
 
                 reverse == 0 ?  col++ : row++;
             }
-            temp = - s * A[idxBand(row, col, k)];  // élément non stockable dans la matrice symmetrique bande
-            A[idxBand(row, col, k)] = c * A[idxBand(row, col, k)];
+            //temp = - s * A[idxBand(row, col, k)];  // élément non stockable dans la matrice symmetrique bande
+            //A[idxBand(row, col, k)] = c * A[idxBand(row, col, k)];
 
             A[idxBand(i, j, k)] = r;                // A[i, j] = r
             A[idxBand(i+1, j, k)] = 0;              // A[i+1, j] = 0
@@ -87,7 +87,6 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
 
             printf("\n");
             print_band_matrix(A, n, k);
-            break;
         }
     }
 

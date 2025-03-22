@@ -41,10 +41,16 @@ void test_tridiagonalize(int n, int k) {
     double *d = (double *)malloc(n * sizeof(double));
     double *e = (double *)malloc((n - 1) * sizeof(double));
 
-    double order = 1.0;
+    k++;
+    int count = 0;
     printf("k = %d\n", k);
     for (int i = 0; i < n * (k+1); i++) {
-            A[i] = i;
+            if ((i) % (k+1) == 0) {
+                A[i] = 0.0;
+                count++;
+            } else {
+                A[i] = i - count;
+            }
     }
     
     //printf("Matrice bande initiale:\n");
