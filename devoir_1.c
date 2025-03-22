@@ -1,4 +1,3 @@
-
 #include "devoir_1.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -144,37 +143,32 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
  */
 int step_qr_tridiag(double *d, double *e, int m, double eps) {
 
-    if (m < 2) return 0;
-
-    double mu = nearest((d[m-1] + d[m-2] - sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m])))/2, (d[m-1] + d[m-2] + sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m])))/2, d[m-1]);
+    if (m < 2) return m;
+    if (square(d[m-1] + d[m-2]) + 4 * square(e[m]) < 0) return m;
+    double mu = max_double((d[m-1] + d[m-2] - sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m])))/2,(d[m-1] + d[m-2] + sqrt(square(d[m] + d[m]) + 4 * square(e[m])))/2);
 
     for (int i = 0; i < m - 1; i++) d[i] -= mu;
-
-    double a,b,c,s,r,t;
-    for (int i = 0; i <  m-1; i ++){
-        a = d[i];
-        b = e[i+1];
+    double a = d[0];
+    double b = e[1];
+    double c,s,r;
+    for (int i = 1; i <  m; i ++){
+        if (fabs(b) < eps * (fabs(a) + fabs(d[i + 1]))) continue; // L'élément est déjà nul
         r = hypot(a, b);
         c = a / r;
         s = -b / r;
-        if (i == 0){
-            t = c * d[i] - s * e[i+1];
-            d[i] = c * d[i] + s * e[i+1];
-            e[i+1] = 0;
-            d[i+1] = r;
-        } else {
-            e[i] = s * d[i+1];
-            e[i+1] = 0;
-            e[i+2] = -s * d[i+1];
-            d[i] = r;
-            d[i+1] = c * d[i+1];
-            t = -s * e[i+2];
-        }
+        d[i - 1] = d[i - 1]*c - e[i]*s;
+        e[i-1] = e[i-1]*c;
+        e[i+1] = a * s + b * c;
+        d[i] = c * d[i] - s * e[i];
+        e[i] = s * d[i] + c * e[i];
+        a = d[i];
+        b = e[i + 1];
     }
-    e[0] = 0;
+
     for (int i = 0; i < m - 1; i++) d[i] += mu;
 
     if (fabs(e[m-1]) <= eps * (fabs(d[m-2]) + fabs(d[m-1]))) {
+        e[m-1] = 0.0;
         return m - 1;  
     }
 
