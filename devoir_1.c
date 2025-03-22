@@ -27,11 +27,7 @@
  */
 void tridiagonalize(double *A, int n, int k, double *d, double *e) {
     double c, s, a, b, r;
-    double *mem = (double *)malloc(n * sizeof(double));
-    if (mem == NULL) {
-        free(mem);
-        return;
-    }
+
     
     // Rotation de Givens
     // A --> G A G* = H
@@ -60,18 +56,23 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
             A[idxBand(i, i, k)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;
             A[idxBand(i+1, i, k)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1;
             A[idxBand(i+1, i+1, k)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;
+
             double Aij, Ai1j;
-            // On mets à jour le  reste des colonnes j et j+1
-            // ...
+            // On mets à jour le  reste des lignes i et i + 1
+
+
             printf("\n");
             print_band_matrix(A, n, k);
         }
-
-        d[j] = A[idxBand(j, j, k)];
-        e[j] = A[idxBand(j+1, j, k)];
     }
-    d[n-1] = A[idxBand(n-1, n-1, k)];
-    free(mem);
+
+    // On récupère les éléments diagonaux et sous-diagonaux de la matrice tridiagonale
+    for (int i = 0; i < n; i++) {
+        d[i] = A[idxBand(i, i, k)];
+        if (i < n - 1) {
+            e[i] = A[idxBand(i + 1, i, k)];
+        }
+    }
 }
 
 /**
