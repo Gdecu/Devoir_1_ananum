@@ -53,7 +53,7 @@ void test_tridiagonalize(int n, int k) {
     printf("Stockage de A :\n");
     print_band_matrix_stockage(A, n, k);
 
-    //tridiagonalize(A, n, k, d, e);
+    tridiagonalize(A, n, k, d, e);
     
     printf("Matrice après tridiagonalisation:\n");
     print_band_matrix(A, n, k);

@@ -4,21 +4,13 @@
 #include <math.h>
 #include <string.h> 
 
-#define idxBand(i, j, k) ((i) * ((k) + 1) + ((j) - (i) + (k))) // band
+#define idxBand(i, j, k) ((i) * ((k) + 1) + ((j) - (i) + (k))) 
 #define min_int(a, b) ((a) < (b) ? (a) : (b))
 #define max_int(a, b) ((a) > (b) ? (a) : (b))
 #define square(x) ((x) * (x))
 #define max_double(a, b) ((a) > (b) ? (a) : (b))
+#define nearest(a, b, c)  ((fabs((a) - (c)) < fabs((b) - (c))) ? (a) : (b))
 
-/*
-
- double square( double x){
-    return x * x;
-}
-double max_double(double a, double b) {
-    return (a > b) ? a : b;
-}
-*/
 
 /**
  * @brief tridiagonalise une matrice symétrique bande par transformations de similitudes
@@ -35,14 +27,14 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
     
     // Rotation de Givens
     // A --> A G
-    printf("A --> A G\n");
+    //printf("A --> A G\n");
     for (int i = 0; i < n-1; i++){
         for (int j = k + i; max_int(i,j) - min_int(i,j) > 1; j--){
-            printf("i = %d,j = %d, k  = %d, %d\n", i, j, k, max_int(i,j) - min_int(i,j));
+            //printf("i = %d,j = %d, k  = %d, %d\n", i, j, k, max_int(i,j) - min_int(i,j));
 
             a = A[idxBand(i, j, k)];         // Élément diagonal
             b = A[idxBand(i, j+1, k)];       // Élément sous-diagonal
-            printf("a = %f, b = %f\n", a, b);
+            //printf("a = %f, b = %f\n", a, b);
 
             if (b == 0) {continue;}             // Si l'élément sous-diagonal est nul, on passe à l'itération suivante
 
@@ -57,10 +49,10 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
             for (int l = j + 1; l < n; l++) {//min_int(j + k + 1, n)
                 A[idxBand(i, l, k)] = c * A[idxBand(i, l, k)] - s * A[idxBand(i, l + 1, k)];
                 A[idxBand(i + 1, l, k)] = s * A[idxBand(i, l, k)] + c * A[idxBand(i + 1, l, k)];
-                printf("i = %d, j = %d, l = %d", i, j, l);
+                //printf("i = %d, j = %d, l = %d", i, j, l);
             }
-            printf("\n");
-            print_band_matrix(A, n, k);
+            //printf("\n");
+            //print_band_matrix(A, n, k);
 
 
         }
@@ -106,32 +98,37 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
  */
 int step_qr_tridiag(double *d, double *e, int m, double eps) {
 
-    if (m < 2) return m;
-    if (square(d[m-1] + d[m-2]) + 4 * square(e[m]) < 0) return m;
-    double mu = max_double((d[m-1] + d[m-2] - sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m])))/2,(d[m-1] + d[m-2] + sqrt(square(d[m] + d[m]) + 4 * square(e[m])))/2);
+    if (m < 2) return 0;
+
+    double mu = nearest((d[m-1] + d[m-2] - sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m])))/2, (d[m-1] + d[m-2] + sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m])))/2, d[m-1]);
 
     for (int i = 0; i < m - 1; i++) d[i] -= mu;
-    double a = d[0];
-    double b = e[1];
-    double c,s,r;
-    for (int i = 1; i <  m; i ++){
-        if (fabs(b) < eps * (fabs(a) + fabs(d[i + 1]))) continue; // L'élément est déjà nul
+
+    double a,b,c,s,r,t;
+    for (int i = 0; i <  m-1; i ++){
+        a = d[i];
+        b = e[i+1];
         r = hypot(a, b);
         c = a / r;
         s = -b / r;
-        d[i - 1] = d[i - 1]*c - e[i]*s;
-        e[i-1] = e[i-1]*c;
-        e[i+1] = a * s + b * c;
-        d[i] = c * d[i] - s * e[i];
-        e[i] = s * d[i] + c * e[i];
-        a = d[i];
-        b = e[i + 1];
+        if (i == 0){
+            t = c * d[i] - s * e[i+1];
+            d[i] = c * d[i] + s * e[i+1];
+            e[i+1] = 0;
+            d[i+1] = r;
+        } else {
+            e[i] = s * d[i+1];
+            e[i+1] = 0;
+            e[i+2] = -s * d[i+1];
+            d[i] = r;
+            d[i+1] = c * d[i+1];
+            t = -s * e[i+2];
+        }
     }
-
+    e[0] = 0;
     for (int i = 0; i < m - 1; i++) d[i] += mu;
 
     if (fabs(e[m-1]) <= eps * (fabs(d[m-2]) + fabs(d[m-1]))) {
-        e[m-1] = 0.0;
         return m - 1;  
     }
 
