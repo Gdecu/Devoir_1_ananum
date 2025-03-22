@@ -63,12 +63,15 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
             double Aij, Ai1j;
             // On mets à jour le  reste des colonnes j et j+1
             // ...
-            
-        
             printf("\n");
             print_band_matrix(A, n, k);
         }
+
+        d[j] = A[idxBand(j, j, k)];
+        e[j] = A[idxBand(j+1, j, k)];
     }
+    d[n-1] = A[idxBand(n-1, n-1, k)];
+    free(mem);
 }
 
 /**
