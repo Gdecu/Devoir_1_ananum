@@ -131,6 +131,7 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
             e[j] = A_sym[idxSym(j + 1, j)];
         }
     }
+    free(A_sym);
 }
 
 /**

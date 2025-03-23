@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "devoir_1.h"
+#include <time.h>
+
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -28,31 +30,23 @@ double *create_matrix(int nx, int ny, double lx, double ly) {
     double dx2 = SQUARE(lx / (nx + 1));
     double dy2 = SQUARE(ly / (ny + 1));
     double alpha, beta, gamma;
-    double *L;
-
-    // Choice of node numbering, here nx=4, ny=5
-    // j\i    0   1   2   3
-    //     .  .   .   .   .  .
-    // 0   .  0   1   2   3  .
-    // 1   .  4   5   6   7  .
-    // 2   .  8   9  10  11  .
-    // 3   . 12  13  14  15  .
-    // 4   . 16  17  18  19  .
-    //     .  .   .   .   .  .
 
     k = nx;
     alpha = 1. / dx2;
     beta = 1. / dy2;
     gamma = 2 * (alpha + beta);
-        lda = k + 1;
-        L = (double *)calloc(size * lda, sizeof(double));
-        for (int l = 0; l < size; l++) {
-            L[l * lda + k - k] = -beta; // (i,j)->(i-1,j)
-            if (l % k != 0)
-                L[l * lda + k - 1] = -alpha; // (i,j)->(i,j-1)
-            L[l * lda + k - 0] = +gamma;     // (i,j)->(i  ,j)
-        }    
-    return L;
+    lda = k + 1;
+    double *L = (double *)calloc(size * lda, sizeof(double));
+    if (L == NULL) {
+        printf("Error allocating memory for the matrix\n");
+        exit(1);
+    }
+    for (int l = 0; l < size; l++) {
+        L[l * lda + k - k] = -beta; // (i,j)->(i-1,j)
+        if (l % k != 0)
+            L[l * lda + k - 1] = -alpha; // (i,j)->(i,j-1)
+        L[l * lda + k - 0] = +gamma;     // (i,j)->(i  ,j)
+    }    
 }
 
 void print_sym_band(double *A, int n, int b, char *name) {
@@ -77,13 +71,12 @@ void print_sym_band(double *A, int n, int b, char *name) {
     printf("\n");
 }
 
-void save_eigenvalues(char *name, double *d, int n) {
+void save_vector(char *name, double *d, int n) {
     FILE *f = fopen(name, "w");
     if (f == NULL) {
         printf("Error opening file %s\n", name);
         exit(1);
     }
-    fprintf(f, "# Eigenvalues\n");
     fprintf(f, "# n = %d\n", n);
     for (int i = 0; i < n; i++) {
         fprintf(f, "%20.15le\n", d[i]);
@@ -91,11 +84,27 @@ void save_eigenvalues(char *name, double *d, int n) {
     fclose(f);
 }
 
+void time_complexity_qr_eig(double *L, double *d, double *times, int m, double lx, double ly) {
+    int step = 1;
+    int nb_repetitions = 10;
 
-/**
- * @brief Computes eigenvalues and eigenvectors of a discrete Laplacian matrix
- * @param lx Length of the domain in the x direction
- * @param ly Length of the domain in the y direction
- * @param nx Number of inner nodes in the x direction
- * @param ny Number of inner nodes in the y direction
- */
+    int n, nx;
+    double tmp;
+    clock_t debut, fin;
+    
+    for (nx = 0; nx < m; nx += step) {
+        n = nx * nx;
+        L = create_matrix(nx, nx, lx, ly);
+
+        tmp = 0.0;
+        for (int i = 0; i < nb_repetitions; i++) {
+            debut = clock();
+            qr_eigs_(L, n , nx, 1e-6, 500, d);
+            fin = clock();
+            tmp += ((double)(fin - debut));
+        }
+        double temps_moyen = tmp / (nb_repetitions * CLOCKS_PER_SEC);
+        printf("n = %d, Temps moyen = %f secondes\n", n, temps_moyen);
+        times[nx-1] = temps_moyen;        
+    }
+}

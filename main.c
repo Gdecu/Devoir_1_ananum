@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    test_step_qr(n, 1e-6);
+    //test_step_qr(n, 1e-6);
     //test_tridiagonalize(n, k);
     //test_qr_eigs_(n, k, 1e-6, 500);
 
@@ -217,28 +217,40 @@ int main(int argc, char *argv[]) {
 
     double lx = 4.0;
     double ly = 2.0;
-    int nx = 5;
-    int ny = 5;
-    int n = nx * ny;
+    int nx = 30; // nx constant
+    int ny_start = 5;
+    int ny_end = 150;
 
-    double *A;
+    FILE *output_file = fopen("times.txt", "w");
+    if (output_file == NULL) {
+        fprintf(stderr, "Erreur lors de l'ouverture du fichier times.txt\n");
+        return EXIT_FAILURE;
+    }
 
+    fprintf(output_file, "ny,time\n");
 
-    A = create_matrix(nx, ny, lx, ly);
-    print_sym_band(A, n, nx, "L");
+    for (int ny = ny_start; ny <= ny_end; ny++) {
+        int n = nx * ny;
 
-    double *d = (double *)malloc(n * sizeof(double));
-    double *e = (double *)malloc((n - 1) * sizeof(double));
+        double *A = create_matrix(nx, ny, lx, ly);
+        double *d = (double *)malloc(n * sizeof(double));
+        if (A == NULL || d == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
+        }
 
-    // tes
+        clock_t start = clock();
+        qr_eigs_(A, n, nx, 1e-6, 500, d);
+        clock_t end = clock();
 
-    qr_eigs_(A, n, nx, 1e-6, 500, d);
-    print_vector(d, n);
-    save_eigenvalues("eigenvalues.dat", d, n);
+        double elapsed_time = (double)(end - start) / CLOCKS_PER_SEC;
+        fprintf(output_file, "%d,%f\n", ny, elapsed_time);
+        free(A);
+        free(d);
+    }
 
+    fclose(output_file);
 
-    free(A);
-
-
+    printf("Les temps d'exécution ont été enregistrés dans times.txt\n");
     return EXIT_SUCCESS;
 }
