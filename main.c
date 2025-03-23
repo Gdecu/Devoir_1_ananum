@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h> 
+#include "analyse.h"
 
 #define idxSym(i, j) ((j) * ((j) + 1) / 2 + (i)) // symmetric
 #define idxSymBand(i, j, k) ((k) * (i+1) + j ) // band
@@ -188,6 +189,11 @@ void test_qr_eigs_(int n, int k, double eps, int max_iter){
 }
 
 int main(int argc, char *argv[]) {
+
+    /*
+    TESTING
+    */
+
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <m> <k>\n", argv[0]);
         return EXIT_FAILURE;
@@ -204,6 +210,35 @@ int main(int argc, char *argv[]) {
     test_step_qr(n, 1e-6);
     //test_tridiagonalize(n, k);
     //test_qr_eigs_(n, k, 1e-6, 500);
+
+    /*
+    ANALYSE NUMERIQUE
+    */
+
+    double lx = 4.0;
+    double ly = 2.0;
+    int nx = 5;
+    int ny = 5;
+    int n = nx * ny;
+
+    double *A;
+
+
+    A = create_matrix(nx, ny, lx, ly);
+    print_sym_band(A, n, nx, "L");
+
+    double *d = (double *)malloc(n * sizeof(double));
+    double *e = (double *)malloc((n - 1) * sizeof(double));
+
+    // tes
+
+    qr_eigs_(A, n, nx, 1e-6, 500, d);
+    print_vector(d, n);
+    save_eigenvalues("eigenvalues.dat", d, n);
+
+
+    free(A);
+
 
     return EXIT_SUCCESS;
 }
