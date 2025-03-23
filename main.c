@@ -4,8 +4,8 @@
 #include <math.h>
 #include <string.h> 
 
-#define idxA(i, j) ((i)*n + (j)) // full
-#define idxBand(i, j, k) ((k) * (i+1) + j ) // band
+#define idxA(i, j) ((i)*n + (j)) 
+#define idxBand(i, j, k) ((k) * (i+1) + j ) 
 #define min_int(a, b) ((a) < (b) ? (a) : (b))
 
 void print_band_matrix(double *A, int n, int k) {
@@ -34,6 +34,50 @@ void print_band_matrix_stockage(double *A, int n, int k) {
         }
     }
     printf("\n");
+}
+
+void print_matrix_tridiagonal(double *d, double *e, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == j) {
+                printf(" %8.4f ", d[i]);
+            } else if (i == j - 1 || i == j + 1) {
+                printf(" %8.4f ", e[i < j ? i : j]);
+            } else {
+                printf(" %8.4f ", 0.0);
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void test_step_qr(int m, int k, double eps) {
+    double *d = (double *)malloc(m * sizeof(double));
+    double *e = (double *)malloc((m - 1) * sizeof(double));
+
+    if (d == NULL || e == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < m; i++) {
+        d[i] = (double)rand() / RAND_MAX * 10.0; 
+    }
+    for (int i = 0; i < m - 1; i++) {
+        e[i] = (double)rand() / RAND_MAX * 5.0; 
+    }
+
+    printf("Matrix before QR:\n");
+    print_matrix_tridiagonal(d, e, m);
+
+    step_qr_tridiag(d, e, m, eps);
+
+    printf("Matrix after QR:\n");
+    print_matrix_tridiagonal(d, e, m);
+
+    free(d);
+    free(e);
 }
 
 void test_tridiagonalize(int n, int k) {
@@ -69,36 +113,21 @@ void test_tridiagonalize(int n, int k) {
     free(e);
 }
 
-int main( int argc, char *argv[] ) {
-
-    int n = atoi(argv[1]);
-    int k = atoi(argv[2]);
-
-    test_tridiagonalize(n, k);
-
-    /* test pour qr eigs
-    
-    
-    double *a = (double*)malloc(9 * sizeof(double));
-
-    for (int i = 0; i < 9; i++) {
-        a[i] = i;
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <m> <k>\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
-    printf("a_loc = %p, a[0] = %f, a[1] = %f, a[8] = %f\n", a, a[0], a[1], a[8]);
+    int m = atoi(argv[1]);
+    int k = atoi(argv[2]);
 
-    a[0] = 10;
-    a++;
+    if (m < 2) {
+        fprintf(stderr, "m must be at least 2\n");
+        return EXIT_FAILURE;
+    }
 
-    printf("a_loc = %p, a[0] = %f, a[1] = %f, a[8] = %f\n", a, a[0], a[1], a[8]);
+    test_step_qr(m, k, 1e-6);
 
-    a[0] = 20;
-    a--;
-    a[0] = 30;
-
-    printf("a_loc = %p, a[0] = %f, a[1] = %f, a[8] = %f\n", a, a[0], a[1], a[8]);
-
-    */
-
-    return 0;
+    return EXIT_SUCCESS;
 }
