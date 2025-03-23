@@ -38,25 +38,47 @@ for i in range(7):
     print()
 print()
 
-"""# Givens rotation for rows 2 and 3
+# Givens rotation for rows 2 and 3
 r_23 = np.sqrt(A[2][1] ** 2 + A[3][1] ** 2)
 c_23 = A[2][1] / r_23
 s_23 = -A[3][1] / r_23
 G_23 = np.array([
-    [1, 0, 0, 0, 0, 0],
-    [0, 1, 0, 0, 0, 0],
-    [0, 0, c_23, -s_23, 0, 0],
-    [0, 0, s_23, c_23, 0, 0],
-    [0, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0, 1]])
+    [1, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0],
+    [0, 0, c_23, -s_23, 0, 0, 0],
+    [0, 0, s_23, c_23, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 1]])
 
-print("G_23 = ", G_23)
+
+print("r_23 = ", r_23, "c_23 = ", c_23, "s_23 = ", s_23)
+H = G_23@A@G_23.T.conj()
+for i in range(7):
+    for j in range(7):
+        print(f"{H[i][j]:7.2f}", end=" ")
+    print()
 print()
-print("G_23.T.conj() = ", G_23.T.conj())
+
+
+# Givens rotation for rows 2 and 4
+r_24 = np.sqrt(A[2][1] ** 2 + A[4][1] ** 2)
+c_24 = A[2][1] / r_24
+s_24 = -A[4][1] / r_24
+
+G_24 = np.array([
+    [1, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0],
+    [0, 0, c_24, -s_24, 0, 0, 0],
+    [0, 0, s_24, c_24, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 1]])
+
+print("r_24 = ", r_24, "c_24 = ", c_24, "s_24 = ", s_24)
+H = G_24@A@G_24.T.conj()
+for i in range(7):
+    for j in range(7):
+        print(f"{H[i][j]:7.2f}", end=" ")
+    print()
 print()
-print("r_23 = ", r_23)
-print("c_23 = ", c_23)
-print("s_23 = ", s_23)
-print(G_23 @ A)
-print()
-print(G_23 @ A @ G_23.T.conj())"""

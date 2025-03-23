@@ -7,13 +7,13 @@
 #include <complex.h>
 
 
-#define idxBand(i, j, k) ((k) * (i+1) + j ) // band
+#define idxSymBand(i, j, k) ((k) * (i+1) + j ) // SYM band
+#define idxSym(i, j) ((j) * ((j) + 1) / 2 + (i)) // symmetric
 #define min_int(a, b) ((a) < (b) ? (a) : (b))
 #define max_int(a, b) ((a) > (b) ? (a) : (b))
 #define square(x) ((x) * (x))
 #define max_double(a, b) ((a) > (b) ? (a) : (b))
 #define nearest(a, b, c)  ((fabs((a) - (c)) < fabs((b) - (c))) ? (a) : (b))
-
 
 /**
  * @brief tridiagonalise une matrice symétrique bande par transformations de similitudes
@@ -27,17 +27,26 @@
  */
 void tridiagonalize(double *A, int n, int k, double *d, double *e) {
     double c, s, a, b, r;
-    double temp;    
+
+    double *A_sym = (double *)malloc(n * (n + 1) / 2 * sizeof(double));
+    if (A_sym == NULL) {
+        fprintf(stderr, "Erreur d'allocation mémoire pour A_copy\n");
+        exit(EXIT_FAILURE);
+    }
+
+    symBand_to_sym(A, A_sym, n, k);
+    //print_sym_matrix(A_sym, n, k);
+
     // Rotation de Givens
-    // A --> G A G* = H
-    //printf("A --> A G\n");
+    // A --> G* A G = H
     for (int j = 0; j < n-1; j++){
         for (int i = k + j - 1; i >= j + 1; i--){
+            if (i >= n) continue;
+            //printf("i %d, j %d\n", i, j);
 
-            a = A[idxBand(i, j, k)];         // Élément diagonal
-            b = A[idxBand(i+1, j, k)];       // Élément sous-diagonal
+            a = A[idxSymBand(i, j, k)];         // Élément diagonal
+            b = A[idxSymBand(i+1, j, k)];       // Élément sous-diagonal
             //printf("a = %f, b = %f\n", a, b);
-            //printf("i = %d, j = %d\n", i, j);
 
             if (b == 0) {continue;}             // Si l'élément sous-diagonal est nul, on passe à l'itération suivante
 
@@ -48,41 +57,41 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
 
             // Mise à jour des éléments de la matrice en appliquant la rotation
 
-            double Aii = A[idxBand(i, i, k)];
-            double Ai1i = A[idxBand(i+1, i, k)];
-            double Ai1i1 = A[idxBand(i+1, i+1, k)];
+            double Aii = A[idxSymBand(i, i, k)];
+            double Ai1i = A[idxSymBand(i+1, i, k)];
+            double Ai1i1 = A[idxSymBand(i+1, i+1, k)];
 
 
             double Aij, Aij1; 
             int col = j + 1, row = i; int reverse = 0;
             // On mets à jour le reste
-            for (int x = 0; x < k; x++){
+            for (int x = 0; x <= k; x++){
                 if (col == row) { // On ne touche pas aux éléments qui seront mis à jour plus bas
                     reverse = 1;
                     row += 2;
                     continue;
                 } 
+                printf("x = %d, reverse = %d \n", x, reverse);
                 if (row > n - 1) break;
-                Aij = A[idxBand(row, col, k)]; //printf("Aij = %f\n", Aij);
+                Aij = A[idxSymBand(row, col, k)]; printf("A[%d,%d] = %f\n",row, col, Aij);
                 if (reverse == 0) {
-                    Aij1 = A[idxBand(row + 1, col, k)];
+                    Aij1 = A[idxSymBand(row + 1, col, k)];
                 } else {
-                    Aij1 = A[idxBand(row, col + 1, k)];
-                } //printf("Aij1 = %f\n", Aij1);
+                    Aij1 = A[idxSymBand(row, col + 1, k)];
+                } printf("Aij1 = %f\n", Aij1);
 
-                A[idxBand(row, col, k)] = c * Aij - s * Aij1; //printf("A[%d, %d], %f * %f - %f * %f = %f\n", row, col,c, Aij, s, Aij1, c * Aij - s * Aij1);
-                A[idxBand(row, col + 1, k)] = s * Aij + c * Aij1; //printf("A[%d, %d], %f * %f + %f * %f = %f\n", row, col + 1, s, Aij, c, Aij1, s * Aij + c * Aij1);
+                A[idxSymBand(row, col, k)] = c * Aij - s * Aij1; //printf("A[%d, %d], %f * %f - %f * %f = %f\n", row, col,c, Aij, s, Aij1, c * Aij - s * Aij1);
+                A[idxSymBand(row, col + 1, k)] = s * Aij + c * Aij1; //printf("A[%d, %d], %f * %f + %f * %f = %f\n", row, col + 1, s, Aij, c, Aij1, s * Aij + c * Aij1);
 
                 reverse == 0 ?  col++ : row++;
             }
-            //temp = - s * A[idxBand(row, col, k)];  // élément non stockable dans la matrice symmetrique bande
-            //A[idxBand(row, col, k)] = c * A[idxBand(row, col, k)];
+            reverse = 0;
 
-            A[idxBand(i, j, k)] = r;                // A[i, j] = r
-            A[idxBand(i+1, j, k)] = 0;              // A[i+1, j] = 0
-            A[idxBand(i, i, k)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;
-            A[idxBand(i+1, i, k)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1;
-            A[idxBand(i+1, i+1, k)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;
+            A[idxSymBand(i, j, k)] = c * a - s * b; //printf("A[%d, %d], %f * %f - %f * %f = %f\n", i,j, c, a, s, b, A[idxSymBand(i, j, k)]);                // A[i, j] = r
+            A[idxSymBand(i+1, j, k)] = s * a + c * b;// printf("A[%d, %d], %f * %f + %f * %f = %f\n", i+1, j, s, a, c, b, A[idxSymBand(i+1, j, k)]); // A[i+1, j] = 0
+            A[idxSymBand(i, i, k)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;  //printf("A[%d, %d], %f * %f * %f - 2 * %f * %f * %f + %f * %f * %f= %f\n", i, i, c, c, Aii, c, s, Ai1i, s, s, Ai1i1, A[idxSymBand(i, i, k)]); // A[i, i] = c^2 * Aii - 2 * c * s * Ai1i + s^2 * Ai1i1
+            A[idxSymBand(i+1, i, k)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1; // A[i+1, i] = c * s * Aii + (c^2 - s^2) * Ai1i - c * s * Ai1i1
+            A[idxSymBand(i+1, i+1, k)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1; // A[i+1, i+1] = s^2 * Aii + 2 * c * s * Ai1i + c^2 * Ai1i1
 
 
             printf("\n");
@@ -92,9 +101,9 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
 
     // On récupère les éléments diagonaux et sous-diagonaux de la matrice tridiagonale
     for (int i = 0; i < n; i++) {
-        d[i] = A[idxBand(i, i, k)];
+        d[i] = A[idxSymBand(i, i, k)];
         if (i < n - 1) {
-            e[i] = A[idxBand(i + 1, i, k)];
+            e[i] = A[idxSymBand(i + 1, i, k)];
         }
     }
 }

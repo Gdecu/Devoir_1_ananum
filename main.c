@@ -4,8 +4,8 @@
 #include <math.h>
 #include <string.h> 
 
-#define idxA(i, j) ((i)*n + (j)) // full
-#define idxBand(i, j, k) ((k) * (i+1) + j ) // band
+#define idxSym(i, j) ((j) * ((j) + 1) / 2 + (i)) // symmetric
+#define idxSymBand(i, j, k) ((k) * (i+1) + j ) // band
 #define min_int(a, b) ((a) < (b) ? (a) : (b))
 
 void print_band_matrix(double *A, int n, int k) {
@@ -13,9 +13,27 @@ void print_band_matrix(double *A, int n, int k) {
         for (int j = 0; j < n; j++) {
             if (fabs(i - j) <= k) {
                 if (i >= j) {
-                    printf(" %8.4f ", A[idxBand(i, j, k)]);
+                    printf(" %8.4f ", A[idxSymBand(i, j, k)]);
                 } else {
-                    printf(" %8.4f ", A[idxBand(j, i, k)]);
+                    printf(" %8.4f ", A[idxSymBand(j, i, k)]);
+                }
+            } else {
+                printf(" %8.4f ", 0.0);
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void print_sym_matrix(double *A, int n, int k) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (fabs(i - j) <= k) {
+                    if (i >= j) {
+                    printf(" %8.4f ", A[idxSym(j, i)]); // Accès à la partie triangulaire inférieure
+                } else {
+                    printf(" %8.4f ", A[idxSym(i, j)]); // Symétrie : A[i, j] = A[j, i]
                 }
             } else {
                 printf(" %8.4f ", 0.0);
@@ -36,28 +54,48 @@ void print_band_matrix_stockage(double *A, int n, int k) {
     printf("\n");
 }
 
+void symBand_to_sym( double *A_band, double *A_sym, int n, int k) {
+    int index = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j <= i; j++) {  // On ne parcourt que la partie triangulaire inférieure
+            if (j >= i - k) {  // Si l'élément appartient à la bande
+                A_sym[index++] = A_band[idxSymBand(i, j, k)];
+            } else {
+                A_sym[index++] = 0.0;  // Optionnel : remplir avec 0 si hors de la bande
+            }
+        }
+    }
+}
+
 void test_tridiagonalize(int n, int k) {
     double *A = (double *)malloc(n * (k + 1) * sizeof(double));
     double *d = (double *)malloc(n * sizeof(double));
     double *e = (double *)malloc((n - 1) * sizeof(double));
 
-    k++;
+    //k++;
     int count = 0;
     printf("k = %d\n", k);
     for (int i = 0; i < n * (k+1); i++) {
-            if ((i) % (k+1) == 0) {
+            /*if ((i) % (k+1) == 0) {
                 A[i] = 0.0;
                 count++;
             } else {
                 A[i] = i - count;
-            }
+            }*/
+           A[i] = i;
     }
     
-    //printf("Matrice bande initiale:\n");
-    //print_band_matrix(A, n, k);
+    printf("Matrice bande initiale:\n");
+    print_band_matrix(A, n, k);
 
     //printf("Stockage de A :\n");
     //print_band_matrix_stockage(A, n, k);
+
+    double *A_sym = (double *)malloc((n * (n + 1) / 2) * sizeof(double));
+    symBand_to_sym(A, A_sym, n, k);
+
+    //printf("Matrice bande notation symmetrique:\n");
+    //print_sym_matrix(A_sym, n, k);
 
     tridiagonalize(A, n, k, d, e);
     
