@@ -48,15 +48,16 @@ def tridiagonalize(A):
 
 # Test avec la matrice donnée
 A = np.array([
-    [  3,  6,  9, 12,  0,  0,  0],
-    [  6,  7, 10, 13, 16,  0,  0],
-    [  9, 10, 11, 14, 17, 20,  0],
-    [ 12, 13, 14, 15, 18, 21, 25],
-    [  0, 16, 17, 18, 19, 22, 24],
-    [  0,  0, 20, 21, 22, 23, 26],
-    [  0,  0,  0, 24, 25, 26, 27]
+    [4.5865   , 0.4704 ,   9.3469  ,  8.3097  ,  0.0000 ],
+   [0.4704  ,  6.7886   , 3.8350  ,  0.3457   , 6.7115 ],
+   [9.3469   , 3.8350  ,  5.1942  ,  0.5346  ,  0.0770 ],
+   [8.3097  ,  0.3457  ,  0.5346  ,  5.2970   , 3.8342 ],
+   [0.0000  ,  6.7115   , 0.0770   , 3.8342   , 0.6684]
 ], dtype=float)
 
+v = np.linalg.eig(A)
 d, e = tridiagonalize(A)
-print("Diagonale principale :", d)
-print("Sous-diagonale :", e)
+
+print("Valeur propre de A :", v[0])
+#print("Diagonale principale :", d)
+#print("Sous-diagonale :", e)
