@@ -84,9 +84,6 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
             A[idxBand(i+1, i, k)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1;
             A[idxBand(i+1, i+1, k)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;
 
-
-            printf("\n");
-            print_band_matrix(A, n, k);
         }
     }
 
@@ -157,35 +154,19 @@ int step_qr_tridiag(double *d, double *e, int m, double eps) {
  * @return retourne le nombre d’itérations nécessaires, ou bien -1 si l’algorithme n’a pas convergé
 */
 int qr_eigs_(double *A, int n, int k, double eps, int max_iter, double *d) {
-
-    double *e = (double *)malloc((n-1) * sizeof(double));
-    int m, index, iter = 0;
-
+    double *e = (double *)malloc(n * sizeof(double));
     if (e == NULL) {
         free(e);
         return -1;
     }
-
     tridiagonalize(A, n, k, d, e);
-
-    for (iter = 0; iter < max_iter && n > 1 ; iter ++){
-        m = step_qr_tridiag(d, e, n, eps);
-        if (m  == n - 1){
-            // On a isolé une valeur propre (stocké dans d), la matrice active diminue d'une taille
-            // donc on incremente l'emplacement de d et e de 1
-            d++;
-            e++;
-            index++;
-            n = m;
-        } else if (m != n){
-            free(d);
+    for (int i = 0; i < max_iter; i++) {
+        int m = step_qr_tridiag(d, e, n, eps);
+        if (m == 0) {
             free(e);
-            return -1;
+            return i;
         }
-
+        n = m;
     }
-
-    d -= index; // On ramène d à son emplacement initial -  je pense inutile ...
-    free(e);
-    return iter;
+    return -1;
 }

@@ -40,14 +40,21 @@ void print_matrix_tridiagonal(double *d, double *e, int n) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i == j) {
-                printf(" %8.4f ", d[i]);  // Diagonale principale
+                printf(" %8.4f ", d[i]); 
             } else if (i == j - 1 || i == j + 1) {
-                printf(" %8.4f ", e[i < j ? i + 1 : j + 1]);  // Sur/Sous-diagonale
+                printf(" %8.4f ", e[i < j ? i + 1 : j + 1]);  
             } else {
-                printf(" %8.4f ", 0.0);  // Zéros ailleurs
+                printf(" %8.4f ", 0.0); 
             }
         }
         printf("\n");
+    }
+    printf("\n");
+}
+
+void print_vector(double *v, int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%lf ", v[i]);
     }
     printf("\n");
 }
@@ -65,7 +72,7 @@ void test_step_qr(int m, double eps) {
         d[i] = (double)rand() / RAND_MAX * 10.0; 
     }
     for (int i = 0; i < m; i++) {
-        e[i] = (double)rand() / RAND_MAX * 5.0; 
+        e[i] = (double)rand() / RAND_MAX * 10.0; 
     }
 
     printf("Matrix before QR:\n");
@@ -78,6 +85,27 @@ void test_step_qr(int m, double eps) {
 
     free(d);
     free(e);
+}
+
+void test_qr_eigs_(int n, int k, double eps, int max_iter){
+    double *A = (double *)malloc(n * (k + 1) * sizeof(double));
+    double *d = (double *)malloc(n * sizeof(double));
+    if (A == NULL || d == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j <= k; j++) {
+            A[i * (k + 1) + j] = ((double)rand() / RAND_MAX) * 10.0; 
+        }
+    }
+    printf("Matrice bande initiale:\n");
+    print_band_matrix(A, n, k);
+    qr_eigs_(A, n, k, eps, max_iter, d);
+    printf("Valeur propre:\n");
+    print_vector(d, n);
+    free(A);
+    free(d);
 }
 
 void test_tridiagonalize(int n, int k) {
@@ -116,32 +144,23 @@ void test_tridiagonalize(int n, int k) {
     free(e);
 }
 
-void test_qr_eigs_(int n, int k, double eps, int max_iter){
-    double *A = (double *)malloc(n * (k + 1) * sizeof(double));
-    double *d = (double *)malloc(n * sizeof(double));
-    double *e = (double *)malloc(n* sizeof(double));
-
-    free(A);
-    free(d);
-    free(e);
-}
-
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <m> <k>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    int m = atoi(argv[1]);
+    int n = atoi(argv[1]);
     int k = atoi(argv[2]);
 
-    if (m < 2) {
+    if (n < 2) {
         fprintf(stderr, "m must be at least 2\n");
         return EXIT_FAILURE;
     }
 
-    test_step_qr(m, 1e-6);
-    //test_tridiagonalize(m, k);
+    //test_step_qr(n, 1e-6);
+    //test_tridiagonalize(n, k);
+    test_qr_eigs_(n, k, 1e-6, 500);
 
     return EXIT_SUCCESS;
 }
