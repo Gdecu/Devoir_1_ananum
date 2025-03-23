@@ -29,14 +29,10 @@ void print_band_matrix(double *A, int n, int k) {
 void print_sym_matrix(double *A, int n, int k) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            if (fabs(i - j) <= k) {
-                    if (i >= j) {
-                    printf(" %8.4f ", A[idxSym(j, i)]); // Accès à la partie triangulaire inférieure
-                } else {
-                    printf(" %8.4f ", A[idxSym(i, j)]); // Symétrie : A[i, j] = A[j, i]
-                }
+            if (i >= j) {
+                printf(" %8.4f ", A[idxSym(j, i)]); // Accès à la partie triangulaire inférieure
             } else {
-                printf(" %8.4f ", 0.0);
+                printf(" %8.4f ", A[idxSym(i, j)]); // Symétrie : A[i, j] = A[j, i]
             }
         }
         printf("\n");
@@ -85,8 +81,8 @@ void test_tridiagonalize(int n, int k) {
            A[i] = i;
     }
     
-    printf("Matrice bande initiale:\n");
-    print_band_matrix(A, n, k);
+    //printf("Matrice bande initiale:\n");
+    //print_band_matrix(A, n, k);
 
     //printf("Stockage de A :\n");
     //print_band_matrix_stockage(A, n, k);
@@ -94,13 +90,13 @@ void test_tridiagonalize(int n, int k) {
     double *A_sym = (double *)malloc((n * (n + 1) / 2) * sizeof(double));
     symBand_to_sym(A, A_sym, n, k);
 
-    //printf("Matrice bande notation symmetrique:\n");
-    //print_sym_matrix(A_sym, n, k);
+    printf("Matrice bande notation symmetrique:\n");
+    print_sym_matrix(A_sym, n, k);
 
     tridiagonalize(A, n, k, d, e);
     
-    printf("Matrice après tridiagonalisation:\n");
-    print_band_matrix(A, n, k);
+    //printf("Matrice après tridiagonalisation:\n");
+    //print_band_matrix(A, n, k);
     
     printf("Diagonale principale:\n");
     for (int i = 0; i < n; i++) printf("%8.4f ", d[i]);
