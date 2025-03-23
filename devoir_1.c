@@ -123,12 +123,12 @@ int step_qr_tridiag(double *d, double *e, int m, double eps) {
         s = -b / r;
         cosinus[i] = c;
         sinus[i] = s;
-        if (i != m-2) t_2 = e[i + 2];
+        if (i < m-2) t_2 = e[i + 2];
         t_1 = d[i + 1];
         d[i + 1] = s * e[i + 1] + c * d[i + 1];
         e[i + 1] = c * e[i + 1] - s * t_1;
         d[i] = r;
-        if (i != m-2) e[i + 2] = c * e[i + 2];
+        if (i < m-2) e[i + 2] = c * e[i + 2];
     }
     for (int i = 0; i < m - 1; i++){
         c = cosinus[i];
@@ -186,7 +186,6 @@ int qr_eigs_(double *A, int n, int k, double eps, int max_iter, double *d) {
     }
 
     d -= index; // On ramène d à son emplacement initial -  je pense inutile ...
-
     free(e);
     return iter;
 }

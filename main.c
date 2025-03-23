@@ -40,11 +40,11 @@ void print_matrix_tridiagonal(double *d, double *e, int n) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (i == j) {
-                printf(" %8.4f ", d[i]);
+                printf(" %8.4f ", d[i]);  // Diagonale principale
             } else if (i == j - 1 || i == j + 1) {
-                printf(" %8.4f ", e[i < j ? i : j]);
+                printf(" %8.4f ", e[i < j ? i + 1 : j + 1]);  // Sur/Sous-diagonale
             } else {
-                printf(" %8.4f ", 0.0);
+                printf(" %8.4f ", 0.0);  // Zéros ailleurs
             }
         }
         printf("\n");
@@ -52,9 +52,9 @@ void print_matrix_tridiagonal(double *d, double *e, int n) {
     printf("\n");
 }
 
-void test_step_qr(int m, int k, double eps) {
+void test_step_qr(int m, double eps) {
     double *d = (double *)malloc(m * sizeof(double));
-    double *e = (double *)malloc((m - 1) * sizeof(double));
+    double *e = (double *)malloc(m * sizeof(double));
 
     if (d == NULL || e == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
@@ -64,7 +64,7 @@ void test_step_qr(int m, int k, double eps) {
     for (int i = 0; i < m; i++) {
         d[i] = (double)rand() / RAND_MAX * 10.0; 
     }
-    for (int i = 0; i < m - 1; i++) {
+    for (int i = 0; i < m; i++) {
         e[i] = (double)rand() / RAND_MAX * 5.0; 
     }
 
@@ -97,11 +97,8 @@ void test_tridiagonalize(int n, int k) {
             }
     }
     
-    //printf("Matrice bande initiale:\n");
-    //print_band_matrix(A, n, k);
-
-    //printf("Stockage de A :\n");
-    //print_band_matrix_stockage(A, n, k);
+    printf("Matrice bande initiale:\n");
+    print_band_matrix(A, n, k);
 
     tridiagonalize(A, n, k, d, e);
     
@@ -113,6 +110,16 @@ void test_tridiagonalize(int n, int k) {
     printf("\n\nSous-diagonale:\n");
     for (int i = 0; i < n - 1; i++) printf("%8.4f ", e[i]);
     printf("\n");
+
+    free(A);
+    free(d);
+    free(e);
+}
+
+void test_qr_eigs_(int n, int k, double eps, int max_iter){
+    double *A = (double *)malloc(n * (k + 1) * sizeof(double));
+    double *d = (double *)malloc(n * sizeof(double));
+    double *e = (double *)malloc(n* sizeof(double));
 
     free(A);
     free(d);
@@ -133,7 +140,8 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    test_step_qr(m, k, 1e-6);
+    test_step_qr(m, 1e-6);
+    //test_tridiagonalize(m, k);
 
     return EXIT_SUCCESS;
 }
