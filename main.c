@@ -50,6 +50,29 @@ void print_band_matrix_stockage(double *A, int n, int k) {
     printf("\n");
 }
 
+void print_matrix_tridiagonal(double *d, double *e, int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == j) {
+                printf(" %8.4f ", d[i]); 
+            } else if (i == j - 1 || i == j + 1) {
+                printf(" %8.4f ", e[i < j ? i + 1 : j + 1]);  
+            } else {
+                printf(" %8.4f ", 0.0); 
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void print_vector(double *v, int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%lf ", v[i]);
+    }
+    printf("\n");
+}
+
 void symBand_to_sym( double *A_band, double *A_sym, int n, int k) {
     int index = 0;
     for (int i = 0; i < n; i++) {
@@ -109,36 +132,72 @@ void test_tridiagonalize(int n, int k) {
     free(e);
 }
 
-int main( int argc, char *argv[] ) {
+void test_step_qr(int m, double eps) {
+    double *d = (double *)malloc(m * sizeof(double));
+    double *e = (double *)malloc(m * sizeof(double));
+
+    if (d == NULL || e == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < m; i++) {
+        d[i] = (double)rand() / RAND_MAX * 10.0; 
+    }
+    for (int i = 0; i < m; i++) {
+        e[i] = (double)rand() / RAND_MAX * 10.0; 
+    }
+
+    printf("Matrix before QR:\n");
+    print_matrix_tridiagonal(d, e, m);
+
+    step_qr_tridiag(d, e, m, eps);
+
+    printf("Matrix after QR:\n");
+    print_matrix_tridiagonal(d, e, m);
+
+    free(d);
+    free(e);
+}
+
+void test_qr_eigs_(int n, int k, double eps, int max_iter){
+    double *A = (double *)malloc(n * (k + 1) * sizeof(double));
+    double *d = (double *)malloc(n * sizeof(double));
+    if (A == NULL || d == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j <= k; j++) {
+            A[i * (k + 1) + j] = ((double)rand() / RAND_MAX) * 10.0; 
+        }
+    }
+    printf("Matrice bande initiale:\n");
+    print_band_matrix(A, n, k);
+    qr_eigs_(A, n, k, eps, max_iter, d);
+    printf("Valeur propre:\n");
+    print_vector(d, n);
+    free(A);
+    free(d);
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <m> <k>\n", argv[0]);
+        return EXIT_FAILURE;
+    }
 
     int n = atoi(argv[1]);
     int k = atoi(argv[2]);
 
-    test_tridiagonalize(n, k);
-
-    /* test pour qr eigs
-    
-    
-    double *a = (double*)malloc(9 * sizeof(double));
-
-    for (int i = 0; i < 9; i++) {
-        a[i] = i;
+    if (n < 2) {
+        fprintf(stderr, "m must be at least 2\n");
+        return EXIT_FAILURE;
     }
 
-    printf("a_loc = %p, a[0] = %f, a[1] = %f, a[8] = %f\n", a, a[0], a[1], a[8]);
+    //test_step_qr(n, 1e-6);
+    //test_tridiagonalize(n, k);
+    test_qr_eigs_(n, k, 1e-6, 500);
 
-    a[0] = 10;
-    a++;
-
-    printf("a_loc = %p, a[0] = %f, a[1] = %f, a[8] = %f\n", a, a[0], a[1], a[8]);
-
-    a[0] = 20;
-    a--;
-    a[0] = 30;
-
-    printf("a_loc = %p, a[0] = %f, a[1] = %f, a[8] = %f\n", a, a[0], a[1], a[8]);
-
-    */
-
-    return 0;
+    return EXIT_SUCCESS;
 }
