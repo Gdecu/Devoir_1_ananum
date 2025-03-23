@@ -141,13 +141,18 @@ void test_step_qr(int m, double eps) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(EXIT_FAILURE);
     }
-
-    for (int i = 0; i < m; i++) {
-        d[i] = (double)rand() / RAND_MAX * 10.0; 
-    }
-    for (int i = 0; i < m; i++) {
-        e[i] = (double)rand() / RAND_MAX * 10.0; 
-    }
+    d[0] = 0.0001;
+    d[1] = 1.3154;
+    d[2] = 7.5561;
+    e[0] = 0;
+    e[1] = 5.3277;
+    e[2] = 2.1896;
+    //for (int i = 0; i < m; i++) {
+       // d[i] = (double)rand() / RAND_MAX * 10.0; 
+    //}
+    //for (int i = 0; i < m; i++) {
+      //  e[i] = (double)rand() / RAND_MAX * 10.0; 
+    //}
 
     printf("Matrix before QR:\n");
     print_matrix_tridiagonal(d, e, m);
@@ -196,9 +201,9 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    //test_step_qr(n, 1e-6);
+    test_step_qr(n, 1e-6);
     //test_tridiagonalize(n, k);
-    test_qr_eigs_(n, k, 1e-6, 500);
+    //test_qr_eigs_(n, k, 1e-6, 500);
 
     return EXIT_SUCCESS;
 }

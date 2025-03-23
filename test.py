@@ -91,27 +91,23 @@ A = np.array([
 v = np.linalg.eig(A)
 d, e = tridiagonalize(A)
 
-print("A :\n", A)
+#print("A :\n", A)
 A = np.diag(d) + np.diag(e, k=1) + np.diag(e, k=-1)
-print("Tridiaganlize(A) :\n")
-for i in range(len(A)):
-    for j in range(len(A[0])):
-        print(f"{A[i][j]:7.2f}  ", end=" ")
-    print()
-print()
+#print("Tridiaganlize(A) :\n")
+#for i in range(len(A)):
+    #for j in range(len(A[0])):
+        #print(f"{A[i][j]:7.2f}  ", end=" ")
+    #print()
+#print()
 #print("eigenvalues(tridiagonalize(A)) :", np.linalg.eigvals(A))
-print("Diagonale principale :", d)
-print("Sous-diagonale :", e)
+#print("Diagonale principale :", d)
+#print("Sous-diagonale :", e)
 
 T = [
-    [   3.0000,   16.1555,    0.0000,   -0.0000,    0.0000,    0.0000,    0.0000], 
-    [  16.1555,   35.5517,   43.5304,    0.0000,    0.0000,    0.0000,    0.0000],
-    [   0.0000,   43.5304,   21.5417,   10.7149,    0.0000,    0.0000,    0.0000],
-    [  -0.0000,    0.0000,   10.7149,   -3.1320,    8.9766,   -0.0000,    0.0000],
-    [   0.0000,    0.0000,    0.0000,    8.9766,   22.0577,   12.9134,    0.0000],
-    [   0.0000,    0.0000,    0.0000,   -0.0000,   12.9134,    0.4749,   -5.4996],
-    [   0.0000,    0.0000,    0.0000,    0.0000,    0.0000,   -5.4996,   25.5059]
+    [-12, 9, 4.5],
+    [9, 23, -34],
+    [4.5, -34, 46]
 ]
 # Compute the eigenvalues of the tridiagonal matrix
-#eigenvalues = np.linalg.eigvals(T)
-#print("Eigenvalues of the tridiagonal matrix:", eigenvalues)
+eigenvalues = np.linalg.eigvals(T)
+print("Eigenvalues of the tridiagonal matrix:", eigenvalues)

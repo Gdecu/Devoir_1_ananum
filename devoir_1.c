@@ -143,27 +143,36 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
  */
 int step_qr_tridiag(double *d, double *e, int m, double eps) {
     if (m < 2) return 0;
-    double mu = max_double((d[m-1] + d[m-2] - sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m])))/2,(d[m-1] + d[m-2] + sqrt(square(d[m] + d[m]) + 4 * square(e[m])))/2);
+    double mu = nearest((d[m-1] + d[m-2] - sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m-1])))/2, (d[m-1] + d[m-2] + sqrt(square(d[m-1] + d[m-2]) + 4 * square(e[m-1])))/2, d[m-1]);
     for (int i = 0; i < m - 1; i++) d[i] -= mu;
-    double a = d[0];
-    double b = e[1];
-    double c,s,r;
-    for (int i = 1; i <  m; i ++){
-        if (fabs(b) < eps * (fabs(a) + fabs(d[i + 1]))) continue; // L'élément est déjà nul
+    double a,b,c,s,r,t_1,t_2;
+    double cosinus[m-1];
+    double sinus[m-1];
+    t_2 = e[1];
+    for (int i = 0; i <  m-1; i ++){
+        a = d[i];
+        b = t_2;
         r = hypot(a, b);
         c = a / r;
         s = -b / r;
-        d[i - 1] = d[i - 1]*c - e[i]*s;
-        e[i-1] = e[i-1]*c;
-        e[i+1] = a * s + b * c;
-        d[i] = c * d[i] - s * e[i];
-        e[i] = s * d[i] + c * e[i];
-        a = d[i];
-        b = e[i + 1];
+        cosinus[i] = c;
+        sinus[i] = s;
+        if (i < m-2) t_2 = e[i + 2];
+        t_1 = d[i + 1];
+        d[i + 1] = s * e[i + 1] + c * d[i + 1];
+        e[i + 1] = c * e[i + 1] - s * t_1;
+        d[i] = r;
+        if (i < m-2) e[i + 2] = c * e[i + 2];
+    }
+    for (int i = 0; i < m - 1; i++){
+        c = cosinus[i];
+        s = sinus[i];
+        d[i] = c * d[i] - s * e[i+1];
+        e[i+1] = - s * d[i+1];
+        d[i+1] = c * d[i+1];
     }
     for (int i = 0; i < m - 1; i++) d[i] += mu;
     if (fabs(e[m-1]) <= eps * (fabs(d[m-2]) + fabs(d[m-1]))) {
-        e[m-1] = 0.0;
         return m - 1;  
     }
     return m;
