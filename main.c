@@ -127,6 +127,7 @@ void test_tridiagonalize(int n, int k) {
     for (int i = 0; i < n - 1; i++) printf("%8.4f ", e[i]);
     printf("\n");
 
+    free(A_sym);
     free(A);
     free(d);
     free(e);
