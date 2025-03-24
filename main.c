@@ -1,4 +1,5 @@
 #include "devoir_1.h"
+#include "analyse.h"
  #include <stdio.h>
  #include <stdlib.h>
  #include <math.h>
@@ -160,12 +161,13 @@
              A[i * (k + 1) + j] = ((double)rand() / RAND_MAX) * 10.0; 
          }
      }
-     printf("Matrice bande initiale:\n");
-     print_band_matrix(A, n, k);
+     //printf("Matrice bande initiale:\n");
+     //print_band_matrix(A, n, k);
      int a  = qr_eigs_band(A, n, k, eps, max_iter, d);
-     printf("Nombre d'itérations: %d\n", a);
-     printf("Valeur propre:\n");
-     print_vector(d, n);
+     //printf("Nombre d'itérations: %d\n", a);
+     //printf("Valeur propre:\n");
+     //print_vector(d, n);
+     save_vector("eigenvalues.txt", d, n);
      free(A);
      free(d);
  }
