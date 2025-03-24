@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h> 
+#include "analyse.h"
 
 #define idxSym(i, j) ((j) * ((j) + 1) / 2 + (i)) // symmetric
 #define idxSymBand(i, j, k) ((k) * (i+1) + j ) // band
@@ -166,6 +167,11 @@ void test_qr_eigs_(int n, int k, double eps, int max_iter){
 }
 
 int main(int argc, char *argv[]) {
+
+    /*
+    TESTING
+    */
+
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <m> <k>\n", argv[0]);
         return EXIT_FAILURE;
@@ -183,5 +189,46 @@ int main(int argc, char *argv[]) {
     //test_tridiagonalize(n, k);
     test_qr_eigs_(n, k, 1e-6, 500);
 
+    /*
+    ANALYSE NUMERIQUE
+    */
+
+    double lx = 4.0;
+    double ly = 2.0;
+    int nx = 30; // nx constant
+    int ny_start = 5;
+    int ny_end = 150;
+
+    FILE *output_file = fopen("times.txt", "w");
+    if (output_file == NULL) {
+        fprintf(stderr, "Erreur lors de l'ouverture du fichier times.txt\n");
+        return EXIT_FAILURE;
+    }
+
+    fprintf(output_file, "ny,time\n");
+
+    for (int ny = ny_start; ny <= ny_end; ny++) {
+        int n = nx * ny;
+
+        double *A = create_matrix(nx, ny, lx, ly);
+        double *d = (double *)malloc(n * sizeof(double));
+        if (A == NULL || d == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
+        }
+
+        clock_t start = clock();
+        qr_eigs_(A, n, nx, 1e-6, 500, d);
+        clock_t end = clock();
+
+        double elapsed_time = (double)(end - start) / CLOCKS_PER_SEC;
+        fprintf(output_file, "%d,%f\n", ny, elapsed_time);
+        free(A);
+        free(d);
+    }
+
+    fclose(output_file);
+
+    printf("Les temps d'exécution ont été enregistrés dans times.txt\n");
     return EXIT_SUCCESS;
 }

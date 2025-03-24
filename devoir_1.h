@@ -1,6 +1,3 @@
-#ifndef CODE2_H
-#define CODE2_H
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -13,4 +10,3 @@ int qr_eigs_(double *A, int n, int k, double eps, int max_iter, double *d);
 void print_band_matrix(double *A, int n, int k);
 void print_sym_matrix(double *A, int n, int k);
 void symBand_to_sym( double *A_band, double *A_sym, int n, int k);
-#endif
