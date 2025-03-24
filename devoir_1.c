@@ -25,114 +25,67 @@
  * @param e est un tableau de taille n qui contient en sortie la sous-diagonale de la matrice tridiagonale dans ses n − 1 premiers éléments
  */
 void tridiagonalize(double *A, int n, int k, double *d, double *e) {
-    double c, s, a, b, r;
-
-    double *A_sym = (double *)malloc(n * (n + 1) / 2 * sizeof(double));
-    if (A_sym == NULL) {
-        fprintf(stderr, "Erreur d'allocation mémoire pour A_copy\n");
-        exit(EXIT_FAILURE);
-    }
-
-    symBand_to_sym(A, A_sym, n, k);
-    //print_sym_matrix(A_sym, n, k);
-
-    // Rotation de Givens
-    // A --> G* A G = H
-    for (int j = 0; j < n-1; j++){
-        for (int i = n-1; i >= j + 1; i--){
-            //printf("i %d, j %d\n", i, j);
-
-            a = A_sym[idxSym(i,j)];         //A[idxSymBand(i, j, k)];         // Élément diagonal
-            b = A_sym[idxSym(i+1,j)];       //A[idxSymBand(i+1, j, k)];       // Élément sous-diagonal
-            //printf("a = %f, b = %f\n", a, b);
-
-
-            r = sqrt(a * a + b * b);
-            c = a / r;
-            s = -b / r;
-
-            if (fabs(b) < 1e-10) {
-                c = 1.0; s = 0.0;
-                continue;}             // Si l'élément sous-diagonal est nul, on passe à l'itération suivante
-
-            //printf("c = %f, s = %f, r = %f\n", c, s, r);
-
-
-            // Mise à jour des éléments de la matrice en appliquant la rotation
-
-            double Aii = A_sym[idxSym(i,i)];           //A[idxSymBand(i, i, k)];
-            double Ai1i = A_sym[idxSym(i+1,i)];        //A[idxSymBand(i+1, i, k)];
-            double Ai1i1 = A_sym[idxSym(i+1,i+1)];     //A[idxSymBand(i+1, i+1, k)];
-
-
-            double Aij, Aij1, hist;
-            int col = j + 1, row = i; int reverse = 0;
-            // On mets à jour le reste
-            for (int x = 0; x <= n; x++){
-                if (col == row) { // On ne touche pas aux éléments qui seront mis à jour plus bas
-                    reverse = 1;
-                    row += 2;
-                    continue;
-                } 
-                //printf("x = %d, reverse = %d \n", x, reverse);
-                if (row > n - 1) break;
-                Aij = A_sym[idxSym(row,col)];                //A[idxSymBand(row, col, k)]; 
-                //printf("A[%d,%d] = %f\n",row, col, Aij);
-                if (reverse == 0) {
-                    Aij1 = A_sym[idxSym(row+1, col)];        //A[idxSymBand(row + 1, col, k)];
-                } else {
-                    Aij1 = A_sym[idxSym(row,col+1)];         //A[idxSymBand(row, col + 1, k)];
-                } //printf("A[%d, %d] = %f\n", row,col+1, Aij1);
-
-                A_sym[idxSym(row,col)] = c * Aij - s * Aij1;            //A[idxSymBand(row, col, k)] = c * Aij - s * Aij1; 
-                //printf("A[%d, %d], %f * %f - %f * %f = %f\n", row, col,c, Aij, s, Aij1, c * Aij - s * Aij1);
-
-                if (reverse == 0) {
-                    A_sym[idxSym(row+1,col)] = s * Aij + c * Aij1;          //A[idxSymBand(row+1, col, k)] = s * Aij + c * Aij1; 
-                    //printf("A[%d, %d], %f * %f + %f * %f = %f\n", row, col + 1, s, Aij, c, Aij1, s * Aij + c * Aij1); 
-                } else {
-                    A_sym[idxSym(row,col+1)] = s * Aij + c * Aij1;          //A[idxSymBand(row, col + 1, k)] = s * Aij + c * Aij1; 
-                    //printf("A[%d, %d], %f * %f + %f * %f = %f\n", row, col + 1, s, Aij, c, Aij1, s * Aij + c * Aij1);                   
-                }
-
-
-                reverse == 0 ?  col++ : row++;
-            }
-            reverse = 0;
-
-            // A[i, j] = r
-            A_sym[idxSym(i,j)] = (c * a - s * b);             //A[idxSymBand(i, j, k)] = c * a - s * b; 
-            //printf("A[%d, %d], %f * %f - %f * %f = %f\n", i,j, c, a, s, b, A_sym[idxSym(i, j)]);
-
-            // A[i+1, j] = 0           
-            A_sym[idxSym(i+1,j)] = s * a + c * b;           //A[idxSymBand(i+1, j, k)] = s * a + c * b;
-            //printf("A[%d, %d], %f * %f + %f * %f = %f\n", i+1, j, s, a, c, b, A_sym[idxSym(i+1, j)]);          
-            
-            // A[i, i] = c^2 * Aii - 2 * c * s * Ai1i + s^2 * Ai1i1
-            A_sym[idxSym(i,i)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;             //A[idxSymBand(i, i, k)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;  
-            //printf("A[%d, %d], %f * %f * %f - 2 * %f * %f * %f + %f * %f * %f= %f\n", i, i, c, c, Aii, c, s, Ai1i, s, s, Ai1i1, A_sym[idxSym(i, i)]);
-            
-            // A[i+1, i] = c * s * Aii + (c^2 - s^2) * Ai1i - c * s * Ai1i1
-            A_sym[idxSym(i+1,i)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1;        //A[idxSymBand(i+1, i, k)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1; 
-            
-            // A[i+1, i+1] = s^2 * Aii + 2 * c * s * Ai1i + c^2 * Ai1i1
-            A_sym[idxSym(i+1,i+1)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;        //A[idxSymBand(i+1, i+1, k)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1; 
-
-
-            //printf("\n");
-            //print_band_matrix(A, n, k);
-            //print_sym_matrix(A_sym, n, k);
-        }
-    }
-    //print_sym_matrix(A_sym, n, k);
-    for (int j = 0; j < n; j++) {
-        d[j] = A_sym[idxSym(j,j)];
-        if (j < n - 1) {
-            e[j] = A_sym[idxSym(j + 1, j)];
-        }
-    }
-    free(A_sym);
-}
+     double c, s, a, b, r;
+     double *A_sym = (double *)malloc(n * (n + 1) / 2 * sizeof(double));
+     if (A_sym == NULL) {
+         fprintf(stderr, "Erreur d'allocation mémoire pour A_copy\n");
+         exit(EXIT_FAILURE);
+     }
+     symBand_to_sym(A, A_sym, n, k);
+     for (int j = 0; j < n-1; j++){
+         for (int i = n-1; i >= j + 1; i--){
+             a = A_sym[idxSym(i,j)];        
+             b = A_sym[idxSym(i+1,j)];       
+             r = sqrt(a * a + b * b);
+             c = a / r;
+             s = -b / r;
+             if (fabs(b) < 1e-10) {
+                 c = 1.0; s = 0.0;
+                 continue;}            
+             double Aii = A_sym[idxSym(i,i)];         
+             double Ai1i = A_sym[idxSym(i+1,i)];       
+             double Ai1i1 = A_sym[idxSym(i+1,i+1)];    
+             double Aij, Aij1, hist;
+             int col = j + 1, row = i; int reverse = 0;
+             for (int x = 0; x <= n; x++){
+                 if (col == row) { 
+                     reverse = 1;
+                     row += 2;
+                     continue;
+                 } 
+                 if (row > n - 1) break;
+                 Aij = A_sym[idxSym(row,col)];             
+                 if (reverse == 0) {
+                     Aij1 = A_sym[idxSym(row+1, col)];       
+                 } else {
+                     Aij1 = A_sym[idxSym(row,col+1)];         
+                 } 
+ 
+                 A_sym[idxSym(row,col)] = c * Aij - s * Aij1;      
+ 
+                 if (reverse == 0) {
+                     A_sym[idxSym(row+1,col)] = s * Aij + c * Aij1;          
+                 } else {
+                     A_sym[idxSym(row,col+1)] = s * Aij + c * Aij1;                         
+                 }
+                 reverse == 0 ?  col++ : row++;
+             }
+             reverse = 0;
+             A_sym[idxSym(i,j)] = (c * a - s * b);   
+             A_sym[idxSym(i+1,j)] = s * a + c * b;       
+             A_sym[idxSym(i,i)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;  
+             A_sym[idxSym(i+1,i)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1;   
+             A_sym[idxSym(i+1,i+1)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;        
+         }
+     }
+     for (int j = 0; j < n; j++) {
+         d[j] = A_sym[idxSym(j,j)];
+         if (j < n - 1) {
+             e[j] = A_sym[idxSym(j + 1, j)];
+         }
+     }
+     free(A_sym);
+ }
 
 /**
  * @brief effectue une étape de l’algorithme QR avec un shift de Wilkinson µ sur une matrice tridiagonale symétrique
@@ -141,7 +94,7 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
  * @param m indique la taille de la matrice active (m ≤ n), c’est-à-dire sur laquelle on n’a pas encore isolé les valeurs propres
  * @param eps la tolérance pour déclarer qu’une valeur propre a été isolée : Golub et Van Loan proposent |hp+1,p| ≤ ϵ(|hpp| + |hp+1,p+1|).
  * @return nombre la nouvelle taille de la matrice active
- */
+*/
 int step_qr_tridiag(double *d, double *e, int m, double eps) {
     double mu;  
     double delta = (d[m - 2]-d[m - 1]) / 2.0;
