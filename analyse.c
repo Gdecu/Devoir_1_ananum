@@ -99,7 +99,7 @@ void time_complexity_qr_eig(double *L, double *d, double *times, int m, double l
         tmp = 0.0;
         for (int i = 0; i < nb_repetitions; i++) {
             debut = clock();
-            qr_eigs_(L, n , nx, 1e-6, 500, d);
+            qr_eigs_band(L, n , nx, 1e-6, 500, d);
             fin = clock();
             tmp += ((double)(fin - debut));
         }

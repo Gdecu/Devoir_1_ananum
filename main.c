@@ -148,7 +148,7 @@
      free(e);
  }
  
- void test_qr_eigs_(int n, int k, double eps, int max_iter){
+ void test_qr_eigs_band(int n, int k, double eps, int max_iter){
      double *A = (double *)malloc(n * (k + 1) * sizeof(double));
      double *d = (double *)malloc(n * sizeof(double));
      if (A == NULL || d == NULL) {
@@ -186,7 +186,7 @@
  
      //test_step_qr(n, 1e-6);
      //test_tridiagonalize(n, k);
-     test_qr_eigs_(n, k, 1e-6, 1000);
+     test_qr_eigs_band(n, k, 1e-6, 1000);
  
      return EXIT_SUCCESS;
  }
