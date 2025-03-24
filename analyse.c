@@ -50,7 +50,8 @@ double *create_matrix(int nx, int ny, double lx, double ly) {
             if (l % k != 0)
                 L[l * lda + k - 1] = -alpha; // (i,j)->(i,j-1)
             L[l * lda + k - 0] = +gamma;     // (i,j)->(i  ,j)
-    }    
+    }
+    return L;
 }
 
 void print_sym_band(double *A, int n, int b, char *name) {

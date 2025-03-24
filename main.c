@@ -73,19 +73,7 @@
      }
      printf("\n");
  }
- 
- void symBand_to_sym( double *A_band, double *A_sym, int n, int k) {
-     int index = 0;
-     for (int i = 0; i < n; i++) {
-         for (int j = 0; j <= i; j++) {  // On ne parcourt que la partie triangulaire inférieure
-             if (j >= i - k) {  // Si l'élément appartient à la bande
-                 A_sym[index++] = A_band[idxSymBand(i, j, k)];
-             } else {
-                 A_sym[index++] = 0.0;  // Optionnel : remplir avec 0 si hors de la bande
-             }
-         }
-     }
- }
+
  
  void test_tridiagonalize(int n, int k) {
      double *A = (double *)malloc(n * (k + 1) * sizeof(double));
@@ -164,7 +152,7 @@
      //printf("Matrice bande initiale:\n");
      //print_band_matrix(A, n, k);
      int a  = qr_eigs_band(A, n, k, eps, max_iter, d);
-     //printf("Nombre d'itérations: %d\n", a);
+     printf("Nombre d'itérations: %d\n", a);
      //printf("Valeur propre:\n");
      //print_vector(d, n);
      save_vector("eigenvalues.txt", d, n);
@@ -188,18 +176,27 @@
  
      //test_step_qr(n, 1e-6);
      //test_tridiagonalize(n, k);
-     test_qr_eigs_band(n, k, 1e-6, 1000);
+     //test_qr_eigs_band(n, k, 1e-6, 1000);
 
 
 
-/*
+
      double lx = 4.0;
      double ly = 2.0;
      int nx = 2;
-     int ny = 3;
+     int ny = 2;
      n = nx * ny;
+     k = nx;
  
-     double *A = create_matrix(nx, ny, lx, ly);
+     double *A;
+     A = create_matrix(nx, ny, lx, ly);
+     printf("Matrice initiale: %f\n", A[0]);
+     printf("Matrice bande initiale:\n");
+     for (int i = 0; i < (k+1) * n; i++) {
+         printf("%8.4f ", A[i]);
+     }
+     print_band_matrix_stockage(A, n, nx);
+     print_band_matrix(A, n, nx);
      double *d = (double *)malloc(n * sizeof(double));
 
     int a  = qr_eigs_band(A, n, nx, 1e-6, 1000, d);
@@ -209,7 +206,7 @@
 
     free(A);
     free(d);
-*/
+
 
 
  

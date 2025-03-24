@@ -14,6 +14,19 @@
 #define max_double(a, b) ((a) > (b) ? (a) : (b))
 #define nearest(a, b, c)  ((fabs((a) - (c)) < fabs((b) - (c))) ? (a) : (b))
 
+void symBand_to_sym( double *A_band, double *A_sym, int n, int k) {
+    int index = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j <= i; j++) {  // On ne parcourt que la partie triangulaire inférieure
+            if (j >= i - k) {  // Si l'élément appartient à la bande
+                A_sym[index++] = A_band[idxSymBand(i, j, k)];
+            } else {
+                A_sym[index++] = 0.0;  // Optionnel : remplir avec 0 si hors de la bande
+            }
+        }
+    }
+}
+
 /**
  * @brief tridiagonalise une matrice symétrique bande par transformations de similitudes
  * @param A entrées de la matrice dans un tableau Row-Major :
