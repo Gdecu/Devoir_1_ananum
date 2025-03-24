@@ -101,11 +101,11 @@ int step_qr_tridiag(double *d, double *e, int m, double eps) {
      double delta = (d[m - 2]-d[m - 1]) / 2.0;
      double sign_delta = (delta >= 0) ? 1.0 : -1.0;
      if(delta <= 10e-12){
-         mu = d[m - 1] - fabs(e[m - 1]);    // VOIR SI ON PEUT PAS CHANGER D'INDEX POUR PAS SORTIR DU MALLOC
+         mu = d[m - 1] - fabs(e[m - 1]);    
 
      }else{         
          mu = d[m - 1] - ((sign_delta*square(e[m - 1]))) / (fabs(delta) +  sqrt(square(delta) + square(e[m - 1])));
-                                            // VOIR SI ON PEUT PAS CHANGER D'INDEX POUR PAS SORTIR DU MALLOC
+                                            
      }
      for (int i = 0; i < m; i++) d[i] -= mu;
      double c,s,r,t_1,t_2;
@@ -119,24 +119,24 @@ int step_qr_tridiag(double *d, double *e, int m, double eps) {
          cosinus[i] = c;
          sinus[i] = s;
          d[i] = c * d[i] + s * t_2;         
-         t_1 = e[i+1];                      // VOIR SI ON PEUT PAS CHANGER D'INDEX POUR PAS SORTIR DU MALLOC
+         t_1 = e[i+1];                      
          e[i+1] = s * d[i+1] + c * e[i+1];
          d[i+1] = -s * t_1 + c * d[i+1];
          if(i < m-2){                       
-             t_2= e[i+2];                   // VOIR SI ON PEUT PAS CHANGER D'INDEX POUR PAS SORTIR DU MALLOC
+             t_2= e[i+2];                   
              e[i+2] *= c;
          }
      }
      for (int i = 0; i < m - 1; i++){
          c = cosinus[i];
          s = sinus[i];
-         d[i] = c * d[i] + s * e[i+1];      // VOIR SI ON PEUT PAS CHANGER D'INDEX POUR PAS SORTIR DU MALLOC
+         d[i] = c * d[i] + s * e[i+1];      
          e[i+1] =  s * d[i+1];
          d[i+1] *= c;    
      }
      for (int i = 0; i < m; i++) d[i] += mu;
      e[0] = 0.0;
-     for(int i = m-1; i>=0; i--){           // VOIR SI ON PEUT PAS CHANGER D'INDEX POUR PAS SORTIR DU MALLOC
+     for(int i = m-1; i>=0; i--){           
          if( fabs(e[i]) < eps * (fabs(d[i-1]) + fabs(d[i])) ) {
              m--;
          }
@@ -163,7 +163,10 @@ int qr_eigs_band(double *A, int n, int k, double eps, int max_iter, double *d) {
         fprintf(stderr, "Memory allocation failed\n");
         return -1;
     }
+
     tridiagonalize_band(A, n, k, d, e);
+    
+
     for (int i = 0; i < max_iter; i++) {
          int m = step_qr_tridiag(d, e, n, eps);
          if (m == 0) {

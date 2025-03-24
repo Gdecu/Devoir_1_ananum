@@ -191,10 +191,12 @@
      test_qr_eigs_band(n, k, 1e-6, 1000);
 
 
+
+/*
      double lx = 4.0;
      double ly = 2.0;
      int nx = 2;
-     int ny = 2;
+     int ny = 3;
      n = nx * ny;
  
      double *A = create_matrix(nx, ny, lx, ly);
@@ -207,7 +209,68 @@
 
     free(A);
     free(d);
+*/
+
 
  
+/*
+         //COMPLEXITY TESTES
+        int nxs[8] = {2, 5, 10,25,50,100,200,1000};
+        int nys[8] = {1000,400,200,80,40,20,10,2};
+    
+        for(int i = 0; i<8; i++){
+            int nx = nxs[i];
+            int ny = nys[i];
+            double *Laplace = create_matrix(nx, ny, 2, 2); 
+            double *eig = malloc(nx*ny * sizeof(double));
+    
+            double start = (double)clock() / CLOCKS_PER_SEC;
+            int feedback = qr_eigs_band(Laplace, nx*ny, nx, 10e-6, (int)10e6, eig);
+            fprintf(stderr, "feedback %d", feedback);
+            double end = (double) clock() / CLOCKS_PER_SEC;
+    
+            fprintf(stderr, "nx = %d\n", ny);
+            fprintf(stderr, "Total time: %f seconds\n", end - start);
+    
+    
+            free(eig);
+        }
+    */
+        
+    
+    
+        int nValues[9] = {5, 10, 50, 100, 500, 1000, 5000, 10000, 50000};
+        // LAPALCE 1D
+        for (int idx = 0; idx<9; idx++){
+            printf("n = %d\n", nValues[idx]);
+            int n = nValues[idx];
+            int k = 1;
+            double h = 2.0 / (n + 1);
+            double * A = (double*) malloc(n * (k+1) * sizeof(double));
+            for(int i = 0; i<n; i++){
+                if(i!=0) A[idxSymBand(i, i-1,k)] = -1/(h*h);
+                A[idxSymBand(i, i, k)] = 2/(h*h);
+            }
+        
+            double *d = (double *) malloc(n * sizeof(double));
+        
+            qr_eigs_band(A, n, k, 1e-6, 2000000, d);
+            char filename[50];
+            sprintf(filename, "./solutions/solution%d.txt", n);
+            FILE *file = fopen(filename, "w");
+            if (file == NULL) {
+                fprintf(stderr, "Error opening file\n");
+                exit(1);
+            }
+            for(int i = 0; i<n; i++){
+                fprintf(file, "%f\n", d[i]);
+            }
+            fclose(file);
+            free(A);
+            free(d);
+        }
+    
+    
+
      return EXIT_SUCCESS;
  }
