@@ -91,24 +91,11 @@ void test_tridiagonalize(int n, int k) {
     double *d = (double *)malloc(n * sizeof(double));
     double *e = (double *)malloc((n - 1) * sizeof(double));
 
-    //k++;
     int count = 0;
     printf("k = %d\n", k);
     for (int i = 0; i < n * (k+1); i++) {
-            /*if ((i) % (k+1) == 0) {
-                A[i] = 0.0;
-                count++;
-            } else {
-                A[i] = i - count;
-            }*/
            A[i] = i;
     }
-    
-    //printf("Matrice bande initiale:\n");
-    //print_band_matrix(A, n, k);
-
-    //printf("Stockage de A :\n");
-    //print_band_matrix_stockage(A, n, k);
 
     double *A_sym = (double *)malloc((n * (n + 1) / 2) * sizeof(double));
     symBand_to_sym(A, A_sym, n, k);
@@ -117,9 +104,6 @@ void test_tridiagonalize(int n, int k) {
     print_sym_matrix(A_sym, n, k);
 
     tridiagonalize(A, n, k, d, e);
-    
-    //printf("Matrice après tridiagonalisation:\n");
-    //print_band_matrix(A, n, k);
     
     printf("Diagonale principale:\n");
     for (int i = 0; i < n; i++) printf("%8.4f ", d[i]);
@@ -141,23 +125,17 @@ void test_step_qr(int m, double eps) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(EXIT_FAILURE);
     }
-    d[0] = 0.0001;
+    d[0] = 0.001;
     d[1] = 1.3154;
     d[2] = 7.5561;
     e[0] = 0;
     e[1] = 5.3277;
     e[2] = 2.1896;
-    //for (int i = 0; i < m; i++) {
-       // d[i] = (double)rand() / RAND_MAX * 10.0; 
-    //}
-    //for (int i = 0; i < m; i++) {
-      //  e[i] = (double)rand() / RAND_MAX * 10.0; 
-    //}
 
     printf("Matrix before QR:\n");
     print_matrix_tridiagonal(d, e, m);
 
-    step_qr_tridiag(d, e, m, eps);
+    printf("%i",step_qr_tridiag(d, e, m, eps));
 
     printf("Matrix after QR:\n");
     print_matrix_tridiagonal(d, e, m);
@@ -201,9 +179,9 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    test_step_qr(n, 1e-6);
+    //test_step_qr(n, 1e-6);
     //test_tridiagonalize(n, k);
-    //test_qr_eigs_(n, k, 1e-6, 500);
+    test_qr_eigs_(n, k, 1e-6, 500);
 
     return EXIT_SUCCESS;
 }
