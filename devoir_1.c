@@ -24,7 +24,7 @@
  * @param d tableau de taille n qui contient en sortie la diagonale principale de la matrice tridiagonale (Hessenberg symétrique)
  * @param e est un tableau de taille n qui contient en sortie la sous-diagonale de la matrice tridiagonale dans ses n − 1 premiers éléments
  */
-void tridiagonalize(double *A, int n, int k, double *d, double *e) {
+void tridiagonalize_band(double *A, int n, int k, double *d, double *e) {
      double c, s, a, b, r;
      double *A_sym = (double *)malloc(n * (n + 1) / 2 * sizeof(double));
      if (A_sym == NULL) {
@@ -155,13 +155,13 @@ int step_qr_tridiag(double *d, double *e, int m, double eps) {
  * @param d tableau de taille n qui contient en sortie les valeurs propres de la matrice A
  * @return retourne le nombre d’itérations nécessaires, ou bien -1 si l’algorithme n’a pas convergé
 */
-int qr_eigs_(double *A, int n, int k, double eps, int max_iter, double *d) {
+int qr_eigs_band(double *A, int n, int k, double eps, int max_iter, double *d) {
     double *e = (double *)malloc((n-1) * sizeof(double));
     if (e == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         return -1;
     }
-    tridiagonalize(A, n, k, d, e);
+    tridiagonalize_band(A, n, k, d, e);
     for (int i = 0; i < max_iter; i++) {
          int m = step_qr_tridiag(d, e, n, eps);
          if (m == 0) {

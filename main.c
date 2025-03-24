@@ -102,7 +102,7 @@
      printf("Matrice bande notation symmetrique:\n");
      print_sym_matrix(A_sym, n, k);
  
-     tridiagonalize(A, n, k, d, e);
+     tridiagonalize_band(A, n, k, d, e);
  
      printf("Matrice après tridiagonalisation:\n");
      print_matrix_tridiagonal(d, e, n);
@@ -162,7 +162,8 @@
      }
      printf("Matrice bande initiale:\n");
      print_band_matrix(A, n, k);
-     qr_eigs_(A, n, k, eps, max_iter, d);
+     int a  = qr_eigs_band(A, n, k, eps, max_iter, d);
+     printf("Nombre d'itérations: %d\n", a);
      printf("Valeur propre:\n");
      print_vector(d, n);
      free(A);
@@ -185,7 +186,7 @@
  
      //test_step_qr(n, 1e-6);
      //test_tridiagonalize(n, k);
-     test_qr_eigs_(n, k, 1e-6, 500);
+     test_qr_eigs_(n, k, 1e-6, 1000);
  
      return EXIT_SUCCESS;
  }
