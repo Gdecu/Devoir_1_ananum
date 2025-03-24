@@ -180,7 +180,7 @@
 
 
 
-
+/*
      double lx = 4.0;
      double ly = 2.0;
      int nx = 2;
@@ -205,35 +205,81 @@
 
 
     free(A);
-    free(d);
+    free(d);*/
 
 
 
  
-/*
          //COMPLEXITY TESTES
-        int nxs[8] = {2, 5, 10,25,50,100,200,1000};
-        int nys[8] = {1000,400,200,80,40,20,10,2};
-    
+
+
+        // k constant - n varie
+        int ny = 5;
+        //int nxs[8] = {400,200,100,50,20,15,10,2};
+        //int nys[8] = {2, 5, 10,25,50,100,200,400};
+        int nxs[15] = {500, 250, 125, 100, 50, 25, 20, 10, 5, 4, 2, 8, 16, 40, 80};
+        int nys[15] = {2, 4, 8, 10, 20, 40, 50, 100, 200, 250, 500, 125, 62, 25, 12};
+
+        
+        printf("k constant - n varie\n");
+        FILE *time_file1 = fopen("times_k.txt", "a");
+        if (time_file1 == NULL) {
+            fprintf(stderr, "Error opening times_k.txt\n");
+            exit(1);
+        }
+        fprintf(time_file1, "n,nx,ny,time\n");
         for(int i = 0; i<8; i++){
+            int nx = nxs[i];
+            double *Laplace = create_matrix(nx, ny, 2, 2); 
+            double *eig = malloc(nx*ny * sizeof(double));
+
+            printf("n = %d\n", nx * ny);
+            printf("nx = %d\n", ny);
+        
+            double start = (double)clock() / CLOCKS_PER_SEC;
+            int feedback = qr_eigs_band(Laplace, nx*ny, nx, 10e-6, (int)10e6, eig);
+            double end = (double) clock() / CLOCKS_PER_SEC;
+
+
+            printf("nb of iterations : %d\n", feedback);
+            printf("Total time: %f seconds\n", end - start);
+            
+            fprintf(time_file1, "%d,%d,%d,%f\n", nx * ny, nx, ny, end - start);
+
+            free(eig);
+        }
+        fclose(time_file1);
+
+        // n constant - k varie
+        printf("n constant - k varie\n");
+        FILE *time_file = fopen("times_n.txt", "a");
+        if (time_file == NULL) {
+            fprintf(stderr, "Error opening times_n.txt\n");
+            exit(1);
+        }
+        fprintf(time_file, "n,nx,ny,time\n");
+        for(int i = 0; i<15; i++){
             int nx = nxs[i];
             int ny = nys[i];
             double *Laplace = create_matrix(nx, ny, 2, 2); 
             double *eig = malloc(nx*ny * sizeof(double));
     
+            printf("n = %d\n", nx*ny);
+            printf("nx = %d\n", ny);
+
             double start = (double)clock() / CLOCKS_PER_SEC;
             int feedback = qr_eigs_band(Laplace, nx*ny, nx, 10e-6, (int)10e6, eig);
-            fprintf(stderr, "feedback %d", feedback);
             double end = (double) clock() / CLOCKS_PER_SEC;
-    
-            fprintf(stderr, "nx = %d\n", ny);
-            fprintf(stderr, "Total time: %f seconds\n", end - start);
-    
-    
+
+
+            printf("nb of iterations : %d\n", feedback);
+            printf("Total time: %f seconds\n", end - start);
+            fprintf(time_file, "%d,%d,%d,%f\n", nx * ny, nx, ny, end - start);
+
             free(eig);
         }
-    */
-        
+
+        fclose(time_file);
     
     
         int nValues[9] = {5, 10, 50, 100, 500, 1000, 5000, 10000, 50000};
