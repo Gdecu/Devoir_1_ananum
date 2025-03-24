@@ -76,7 +76,7 @@ void tridiagonalize_band(double *A, int n, int k, double *d, double *e) {
              A_sym[idxSym(i+1,i+1)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;       
          }
      }
-     for (int j = 1; j < n; j++) {
+     for (int j = 0; j < n; j++) {
          d[j] = A_sym[idxSym(j,j)];
          if (j < n - 1) {
              e[j] = A_sym[idxSym(j + 1, j)];
