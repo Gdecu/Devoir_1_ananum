@@ -91,25 +91,11 @@
      double *d = (double *)malloc(n * sizeof(double));
      double *e = (double *)malloc((n - 1) * sizeof(double));
  
-     //k++;
      int count = 0;
      printf("k = %d\n", k);
      for (int i = 0; i < n * (k+1); i++) {
-             /*if ((i) % (k+1) == 0) {
-                 A[i] = 0.0;
-                 count++;
-             } else {
-                 A[i] = i - count;
-             }*/
             A[i] = i;
      }
- 
-     //printf("Matrice bande initiale:\n");
-     //print_band_matrix(A, n, k);
- 
-     //printf("Stockage de A :\n");
-     //print_band_matrix_stockage(A, n, k);
- 
      double *A_sym = (double *)malloc((n * (n + 1) / 2) * sizeof(double));
      symBand_to_sym(A, A_sym, n, k);
  

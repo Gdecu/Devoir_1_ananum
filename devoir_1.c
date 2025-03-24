@@ -6,8 +6,8 @@
 #include <complex.h>
 
 
-#define idxSymBand(i, j, k) ((k) * (i+1) + j ) // SYM band
-#define idxSym(i, j) ((i) * ((i) + 1) / 2 + (j)) // symmetric
+#define idxSymBand(i, j, k) ((k) * (i+1) + j ) 
+#define idxSym(i, j) ((i) * ((i) + 1) / 2 + (j)) 
 #define min_int(a, b) ((a) < (b) ? (a) : (b))
 #define max_int(a, b) ((a) > (b) ? (a) : (b))
 #define square(x) ((x) * (x))
@@ -34,16 +34,16 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
      symBand_to_sym(A, A_sym, n, k);
      for (int j = 0; j < n-1; j++){
          for (int i = n-1; i >= j + 1; i--){
-             a = A_sym[idxSym(i,j)];        
-             b = A_sym[idxSym(i+1,j)];       
+             a = A_sym[idxSym(i,j)];    
+             b = A_sym[idxSym(i+1,j)];      
              r = sqrt(a * a + b * b);
              c = a / r;
              s = -b / r;
              if (fabs(b) < 1e-10) {
                  c = 1.0; s = 0.0;
-                 continue;}            
+                 continue;}         
              double Aii = A_sym[idxSym(i,i)];         
-             double Ai1i = A_sym[idxSym(i+1,i)];       
+             double Ai1i = A_sym[idxSym(i+1,i)];    
              double Ai1i1 = A_sym[idxSym(i+1,i+1)];    
              double Aij, Aij1, hist;
              int col = j + 1, row = i; int reverse = 0;
@@ -56,26 +56,24 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
                  if (row > n - 1) break;
                  Aij = A_sym[idxSym(row,col)];             
                  if (reverse == 0) {
-                     Aij1 = A_sym[idxSym(row+1, col)];       
+                     Aij1 = A_sym[idxSym(row+1, col)];      
                  } else {
-                     Aij1 = A_sym[idxSym(row,col+1)];         
+                     Aij1 = A_sym[idxSym(row,col+1)];        
                  } 
- 
-                 A_sym[idxSym(row,col)] = c * Aij - s * Aij1;      
- 
+                 A_sym[idxSym(row,col)] = c * Aij - s * Aij1;            
                  if (reverse == 0) {
                      A_sym[idxSym(row+1,col)] = s * Aij + c * Aij1;          
                  } else {
-                     A_sym[idxSym(row,col+1)] = s * Aij + c * Aij1;                         
+                     A_sym[idxSym(row,col+1)] = s * Aij + c * Aij1;                           
                  }
                  reverse == 0 ?  col++ : row++;
              }
              reverse = 0;
-             A_sym[idxSym(i,j)] = (c * a - s * b);   
+             A_sym[idxSym(i,j)] = (c * a - s * b);    
              A_sym[idxSym(i+1,j)] = s * a + c * b;       
              A_sym[idxSym(i,i)] = c * c * Aii - 2 *c * s * Ai1i + s * s * Ai1i1;  
              A_sym[idxSym(i+1,i)] = c * s * Aii + (c*c - s*s) * Ai1i - c * s * Ai1i1;   
-             A_sym[idxSym(i+1,i+1)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;        
+             A_sym[idxSym(i+1,i+1)] = s * s * Aii + 2 * c * s * Ai1i + c * c * Ai1i1;       
          }
      }
      for (int j = 0; j < n; j++) {
@@ -83,6 +81,9 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
          if (j < n - 1) {
              e[j] = A_sym[idxSym(j + 1, j)];
          }
+     }
+     for (int i = n - 1; i > 0; i--) {
+            e[i] = e[i - 1];
      }
      free(A_sym);
  }
@@ -96,48 +97,51 @@ void tridiagonalize(double *A, int n, int k, double *d, double *e) {
  * @return nombre la nouvelle taille de la matrice active
 */
 int step_qr_tridiag(double *d, double *e, int m, double eps) {
-    double mu;  
-    double delta = (d[m - 2]-d[m - 1]) / 2.0;
-    double sign_delta = (delta >= 0) ? 1.0 : -1.0;
-    if(delta <= 10e-12){
-        mu = d[m - 1] - fabs(e[m - 1]);
-    }else{
-        mu = d[m - 1] - ((sign_delta*square(e[m - 1]))) / (fabs(delta) +  sqrt(square(delta) + square(e[m - 1])));
-    }
-    for (int i = 0; i < m; i++) d[i] -= mu;
-    double c,s,t_1,t_2;
-    double parameters[2*m];
-    t_2 = e[1];
-    for (int i = 0; i <  m-1; i ++){
-        c = d[i] / sqrt(square(d[i]) + square(t_2));
-        s = t_2 / sqrt(square(d[i]) + square(t_2));
-        parameters[2*i] = c;
-        parameters[2*i+1] = s;
-        d[i] = c*d[i] + s*t_2;
-        t_1 = e[i+1];
-        e[i+1] = s*d[i+1] + c*e[i+1];
-        d[i+1] = -s*t_1 + c*d[i+1];
-        if(i != m-2){
-            t_2= e[i+2];
-            e[i+2] *= c;
-        }
-    }
-    for (int i = 0; i < m - 1; i++){
-        c = parameters[2*i];
-        s = parameters[2*i+1];
-        d[i] = c * d[i] + s * e[i+1];
-        e[i+1] =  s * d[i+1];
-        d[i+1] *= c;    
-    }
-    for (int i = 0; i < m; i++) d[i] += mu;
-    for(int i = m-1; i>=0; i--){
-        if( fabs(e[i]) < eps * (fabs(d[i-1]) + fabs(d[i])) ) {
-            m--;
-        }
-        else{break;}
-    }
-    return m;
-}
+     double mu;  
+     double delta = (d[m - 2]-d[m - 1]) / 2.0;
+     double sign_delta = (delta >= 0) ? 1.0 : -1.0;
+     if(delta <= 10e-12){
+         mu = d[m - 1] - fabs(e[m - 1]);
+     }else{
+         mu = d[m - 1] - ((sign_delta*square(e[m - 1]))) / (fabs(delta) +  sqrt(square(delta) + square(e[m - 1])));
+     }
+     for (int i = 0; i < m; i++) d[i] -= mu;
+     double c,s,r,t_1,t_2;
+     double cosinus[m];
+     double sinus[m];    
+     t_2 = e[1];
+     for (int i = 0; i <  m-1; i ++){
+         r = sqrt(square(d[i]) + square(t_2));
+         c = d[i] / r;
+         s = t_2 / r;
+         cosinus[i] = c;
+         sinus[i] = s;
+         d[i] = c * d[i] + s * t_2;
+         t_1 = e[i+1];
+         e[i+1] = s * d[i+1] + c * e[i+1];
+         d[i+1] = -s * t_1 + c * d[i+1];
+         if(i < m-2){
+             t_2= e[i+2];
+             e[i+2] *= c;
+         }
+     }
+     for (int i = 0; i < m - 1; i++){
+         c = cosinus[i];
+         s = sinus[i];
+         d[i] = c * d[i] + s * e[i+1];
+         e[i+1] =  s * d[i+1];
+         d[i+1] *= c;    
+     }
+     for (int i = 0; i < m; i++) d[i] += mu;
+     e[0] = 0.0;
+     for(int i = m-1; i>=0; i--){
+         if( fabs(e[i]) < eps * (fabs(d[i-1]) + fabs(d[i])) ) {
+             m--;
+         }
+         else{break;}
+     }
+     return m;
+ }
 
 /** 
  * @brief calcule l’entièreté du spectre d’une matrice bande symétrique en faisant appel aux deux fonctions précedentes
