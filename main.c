@@ -213,6 +213,8 @@
          //COMPLEXITY TESTES
 
 
+/*
+
         // k constant - n varie
         int ny = 5;
         //int nxs[8] = {400,200,100,50,20,15,10,2};
@@ -280,9 +282,11 @@
         }
 
         fclose(time_file);
+
+*/
     
-    
-        int nValues[9] = {5, 10, 50, 100, 500, 1000, 5000, 10000, 50000};
+    /*
+        int nValues[9] = {5, 10, 50, 100, 500, 1000, 5000, 10000};
         // LAPALCE 1D
         for (int idx = 0; idx<9; idx++){
             printf("n = %d\n", nValues[idx]);
@@ -312,7 +316,7 @@
             free(A);
             free(d);
         }
-    
+    */
     
 
      return EXIT_SUCCESS;
