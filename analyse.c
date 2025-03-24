@@ -42,10 +42,10 @@ double *create_matrix(int nx, int ny, double lx, double ly) {
         exit(1);
     }
     for (int l = 0; l < size; l++) {
-        L[l * lda + k - k] = -beta; // (i,j)->(i-1,j)
+        L[idxSymBand(l,l,k)] = -beta; // (i,j)->(i-1,j)
         if (l % k != 0)
-            L[l * lda + k - 1] = -alpha; // (i,j)->(i,j-1)
-        L[l * lda + k - 0] = +gamma;     // (i,j)->(i  ,j)
+            L[idxSymBand(l,l-1,k)] = -alpha; // (i,j)->(i,j-1)
+        L[idxSymBand(l,l-k,k)] = +gamma;     // (i,j)->(i  ,j)
     }    
 }
 

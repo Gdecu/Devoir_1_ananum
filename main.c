@@ -189,6 +189,25 @@
      //test_step_qr(n, 1e-6);
      //test_tridiagonalize(n, k);
      test_qr_eigs_band(n, k, 1e-6, 1000);
+
+
+     double lx = 4.0;
+     double ly = 2.0;
+     int nx = 2;
+     int ny = 2;
+     n = nx * ny;
+ 
+     double *A = create_matrix(nx, ny, lx, ly);
+     double *d = (double *)malloc(n * sizeof(double));
+
+    int a  = qr_eigs_band(A, n, nx, 1e-6, 1000, d);
+    printf("Nombre d'itérations: %d\n", a);
+    save_vector("eigenvalues_Laplacian.txt", d, n);
+
+
+    free(A);
+    free(d);
+
  
      return EXIT_SUCCESS;
  }
